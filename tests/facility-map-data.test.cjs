@@ -6,7 +6,7 @@ const vm=require('node:vm');
 const root=path.join(__dirname,'..');
 function load(){
  const context=vm.createContext({window:{},console});
- for(const file of ['data/facilities.js','map.js','app.js']){
+ for(const file of ['data/scenic.js','data/facilities.js','map.js','app.js']){
   let source=fs.readFileSync(path.join(root,file),'utf8');
   if(file==='app.js')source=source.replace(/bindEvents\(\);\s*renderAll\(\);\s*$/,'');
   vm.runInContext(source,context);

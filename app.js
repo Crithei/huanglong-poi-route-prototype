@@ -1,312 +1,214 @@
 const POIS = [
+  ...window.HUANGLONG_SCENIC,
+  ...[
   {
-    id: "visitor-center",
-    name: "黄龙游客中心",
-    aliases: ["游客中心", "黄龙游客中心", "景区游客中心"],
-    category: "服务设施",
-    kind: "service",
-    minutes: 12,
-    effort: 0,
-    rank: 2,
-    routeOrder: 0,
-    routeRole: "entry",
-    description: "入园前可在这里确认票务、咨询和当天的游览安排。",
-    introduction: "把它当作游线的起点，而不是一个需要赶时间的景点。正式版可在这里接入票务、班车和景区公告。",
-    highlights: ["作为设施步行规划的固定起点", "适合在入园前确认返程与天气信息"],
-    tip: "建议预留 10 到 15 分钟完成咨询、补水和集合；服务状态在当前原型中不代表实时信息。",
-    location: [103.819546, 32.749693],
-    coordinateNote: "高德 POI 坐标",
-    tint: "#d2d8d4",
+    "id": "visitor-center",
+    "name": "黄龙游客中心",
+    "aliases": [
+      "游客中心",
+      "黄龙游客中心",
+      "景区游客中心"
+    ],
+    "category": "服务设施",
+    "kind": "service",
+    "minutes": 12,
+    "effort": 0,
+    "rank": 2,
+    "routeOrder": 0,
+    "routeRole": "entry",
+    "description": "入园前可在这里确认票务、咨询和当天的游览安排。",
+    "introduction": "把它当作游线的起点，而不是一个需要赶时间的景点。正式版可在这里接入票务、班车和景区公告。",
+    "highlights": [
+      "作为设施步行规划的固定起点",
+      "适合在入园前确认返程与天气信息"
+    ],
+    "tip": "建议预留 10 到 15 分钟完成咨询、补水和集合；服务状态在当前原型中不代表实时信息。",
+    "location": [
+      103.819546,
+      32.749693
+    ],
+    "coordinateNote": "高德 POI 坐标",
+    "tint": "#d2d8d4"
   },
   {
-    id: "ticket-office",
-    name: "黄龙售票处",
-    aliases: ["售票处", "黄龙售票处", "景区售票处"],
-    category: "服务设施",
-    kind: "service",
-    minutes: 5,
-    effort: 0,
-    rank: 1,
-    routeOrder: 0.1,
-    routeRole: "entry",
-    description: "靠近游客中心的票务节点，适合在出发前核对入园事项。",
-    introduction: "原型将票务节点单独放入目录，便于后续接入预约、检票与排队状态。",
-    highlights: ["可作为入园事项的检查点", "预留票务与排队状态的扩展接口"],
-    tip: "当前只作为静态 POI 展示，票务规则应以官方渠道当天信息为准。",
-    location: [103.820121, 32.749669],
-    coordinateNote: "高德 POI 坐标",
-    tint: "#d2d8d4",
+    "id": "ticket-office",
+    "name": "黄龙售票处",
+    "aliases": [
+      "售票处",
+      "黄龙售票处",
+      "景区售票处"
+    ],
+    "category": "服务设施",
+    "kind": "service",
+    "minutes": 5,
+    "effort": 0,
+    "rank": 1,
+    "routeOrder": 0.1,
+    "routeRole": "entry",
+    "description": "靠近游客中心的票务节点，适合在出发前核对入园事项。",
+    "introduction": "原型将票务节点单独放入目录，便于后续接入预约、检票与排队状态。",
+    "highlights": [
+      "可作为入园事项的检查点",
+      "预留票务与排队状态的扩展接口"
+    ],
+    "tip": "当前只作为静态 POI 展示，票务规则应以官方渠道当天信息为准。",
+    "location": [
+      103.820121,
+      32.749669
+    ],
+    "coordinateNote": "高德 POI 坐标",
+    "tint": "#d2d8d4"
   },
   {
-    id: "cable-car-service-center",
-    name: "索道服务中心",
-    aliases: ["索道服务中心", "黄龙索道", "索道"],
-    category: "索道服务",
-    kind: "service",
-    minutes: 12,
-    effort: 1,
-    rank: 3,
-    routeOrder: 0.2,
-    routeRole: "service",
-    description: "索道相关服务节点，适合在偏好中考虑索道上行时查看。",
-    introduction: "它用于表达交通设施如何参与规划。正式版应接入班次、开放状态、排队时长和购票规则。",
-    highlights: ["可作为高德设施步行规划目的地", "预留索道状态和排队数据接口"],
-    tip: "是否可用、班次与现场组织须由景区服务确认，原型不会将其视为实时状态。",
-    location: [103.83592, 32.75572],
-    coordinateNote: "高德 POI 坐标",
-    tint: "#c4d4ef",
+    "id": "cable-car-service-center",
+    "name": "索道服务中心",
+    "aliases": [
+      "索道服务中心",
+      "黄龙索道",
+      "索道"
+    ],
+    "category": "索道服务",
+    "kind": "service",
+    "minutes": 12,
+    "effort": 1,
+    "rank": 3,
+    "routeOrder": 0.2,
+    "routeRole": "service",
+    "description": "索道相关服务节点，适合在偏好中考虑索道上行时查看。",
+    "introduction": "它用于表达交通设施如何参与规划。正式版应接入班次、开放状态、排队时长和购票规则。",
+    "highlights": [
+      "可作为高德设施步行规划目的地",
+      "预留索道状态和排队数据接口"
+    ],
+    "tip": "是否可用、班次与现场组织须由景区服务确认，原型不会将其视为实时状态。",
+    "location": [
+      103.83592,
+      32.75572
+    ],
+    "coordinateNote": "高德 POI 坐标",
+    "tint": "#c4d4ef"
   },
   {
-    id: "cable-car-upper-ticket",
-    name: "索道上站售票点",
-    aliases: ["索道上站", "索道上站售票点"],
-    category: "索道服务",
-    kind: "service",
-    minutes: 6,
-    effort: 1,
-    rank: 2,
-    routeOrder: 0.3,
-    routeRole: "service",
-    description: "索道上站附近的票务定位点，便于后续处理索道换乘场景。",
-    introduction: "原型以此表示索道上站的服务节点；它不表示实时售票或可达性。",
-    highlights: ["辅助表达索道换乘的起止节点", "可扩展为班次和客流提示"],
-    tip: "当前坐标仅用于原型地图定位，现场服务以景区告示为准。",
-    location: [103.839632, 32.747282],
-    coordinateNote: "高德 POI 坐标",
-    tint: "#c4d4ef",
+    "id": "cable-car-upper-ticket",
+    "name": "索道上站售票点",
+    "aliases": [
+      "索道上站",
+      "索道上站售票点"
+    ],
+    "category": "索道服务",
+    "kind": "service",
+    "minutes": 6,
+    "effort": 1,
+    "rank": 2,
+    "routeOrder": 0.3,
+    "routeRole": "service",
+    "description": "索道上站附近的票务定位点，便于后续处理索道换乘场景。",
+    "introduction": "原型以此表示索道上站的服务节点；它不表示实时售票或可达性。",
+    "highlights": [
+      "辅助表达索道换乘的起止节点",
+      "可扩展为班次和客流提示"
+    ],
+    "tip": "当前坐标仅用于原型地图定位，现场服务以景区告示为准。",
+    "location": [
+      103.839632,
+      32.747282
+    ],
+    "coordinateNote": "高德 POI 坐标",
+    "tint": "#c4d4ef"
   },
   {
-    id: "sightseeing-bus-ticket",
-    name: "观光车售票点",
-    aliases: ["观光车", "观光车售票点", "景区观光车"],
-    category: "观光车服务",
-    kind: "service",
-    minutes: 6,
-    effort: 0,
-    rank: 2,
-    routeOrder: 0.4,
-    routeRole: "service",
-    description: "观光车服务定位点，供后续衔接接驳与排队信息。",
-    introduction: "将交通服务作为 POI 目录的一部分，方便游客按自身偏好把它纳入行程。",
-    highlights: ["面向接驳安排的服务 POI", "可以扩展车辆位置与等候时间"],
-    tip: "原型只展示位置和产品意图，不提供观光车运营承诺。",
-    location: [103.839301, 32.747387],
-    coordinateNote: "高德 POI 坐标",
-    tint: "#c4d4ef",
+    "id": "sightseeing-bus-ticket",
+    "name": "观光车售票点",
+    "aliases": [
+      "观光车",
+      "观光车售票点",
+      "景区观光车"
+    ],
+    "category": "观光车服务",
+    "kind": "service",
+    "minutes": 6,
+    "effort": 0,
+    "rank": 2,
+    "routeOrder": 0.4,
+    "routeRole": "service",
+    "description": "观光车服务定位点，供后续衔接接驳与排队信息。",
+    "introduction": "将交通服务作为 POI 目录的一部分，方便游客按自身偏好把它纳入行程。",
+    "highlights": [
+      "面向接驳安排的服务 POI",
+      "可以扩展车辆位置与等候时间"
+    ],
+    "tip": "原型只展示位置和产品意图，不提供观光车运营承诺。",
+    "location": [
+      103.839301,
+      32.747387
+    ],
+    "coordinateNote": "高德 POI 坐标",
+    "tint": "#c4d4ef"
   },
   {
-    id: "welcome-pond",
-    name: "迎宾池",
-    aliases: ["迎宾池", "迎宾彩池"],
-    category: "彩池",
-    kind: "scenic",
-    minutes: 15,
-    effort: 1,
-    rank: 4,
-    routeOrder: 1,
-    routeRole: "spine",
-    description: "从沟口进入彩池景观的第一处停留，适合建立对水色和钙华的第一印象。",
-    introduction: "迎宾池适合作为低负担的开场停留。它在游线中靠前，因此也能用来判断当天节奏是否合适。",
-    highlights: ["游线前段的彩池景观", "适合作为第一处拍照与调整节奏的停留"],
-    tip: "若希望轻松游览，可短暂停留后继续向上，把更长的时间留给后段核心彩池。",
-    location: [103.825555, 32.749031],
-    coordinateNote: "高德 POI 坐标",
-    tint: "#d5ef87",
+    "id": "medical-point",
+    "name": "洗身洞医疗点",
+    "aliases": [
+      "医疗点",
+      "洗身洞医疗点",
+      "医务室"
+    ],
+    "category": "医疗服务",
+    "kind": "service",
+    "minutes": 8,
+    "effort": 0,
+    "rank": 3,
+    "routeOrder": 3.1,
+    "routeRole": "service",
+    "description": "靠近洗身洞的服务点，作为行程中的安全设施定位。",
+    "introduction": "医疗点不需要被当作游览目标，但应在随行模式中可见。它为后续接入服务时间和应急流程保留了位置。",
+    "highlights": [
+      "游线中段附近的安全设施定位",
+      "可作为高德设施步行规划的目的地"
+    ],
+    "tip": "原型不显示服务能力或营业状态；出现身体不适时应优先遵循景区现场指引。",
+    "location": [
+      103.82818,
+      32.745855
+    ],
+    "coordinateNote": "高德 POI 坐标",
+    "tint": "#efc0b9"
   },
   {
-    id: "liantai-fall",
-    name: "莲台飞瀑",
-    aliases: ["莲台飞瀑", "飞瀑", "莲台瀑布"],
-    category: "瀑布钙华",
-    kind: "scenic",
-    minutes: 18,
-    effort: 1,
-    rank: 6,
-    routeOrder: 2,
-    routeRole: "spine",
-    description: "水流沿钙华台地形成层次感强的瀑布段，适合短暂停留观察。",
-    introduction: "这里把流动的水和钙华形态放在同一视野中，适合在路线前半段安排一段明确的驻足。",
-    highlights: ["水流与钙华台地共同构成的景观段", "停留成本较低，适合平衡节奏"],
-    tip: "雨后、枯水期和现场通行组织都会影响观感与停留长度，原型中的建议时间仅用于规划演示。",
-    location: [103.828038, 32.747202],
-    coordinateNote: "高德 POI 坐标",
-    tint: "#9fd9d4",
-  },
-  {
-    id: "wash-body-viewpoint",
-    name: "洗身洞观景台",
-    aliases: ["洗身洞", "洗身洞观景台"],
-    category: "观景台",
-    kind: "scenic",
-    minutes: 15,
-    effort: 2,
-    rank: 5,
-    routeOrder: 3,
-    routeRole: "spine",
-    description: "游线中的观察节点，适合补充体力感受并决定是否继续加深后段游览。",
-    introduction: "洗身洞观景台被放在中段检查点的位置：游客可在这里确认体力、时间和拍照需求，再继续向核心景观前进。",
-    highlights: ["适合观察游线中段环境", "可作为现场调整路线的自然节点"],
-    tip: "若同行成员体力差异较大，可在这里进行一次明确的时间核对。",
-    location: [103.828682, 32.746221],
-    coordinateNote: "高德 POI 坐标",
-    tint: "#b6d9bf",
-  },
-  {
-    id: "medical-point",
-    name: "洗身洞医疗点",
-    aliases: ["医疗点", "洗身洞医疗点", "医务室"],
-    category: "医疗服务",
-    kind: "service",
-    minutes: 8,
-    effort: 0,
-    rank: 3,
-    routeOrder: 3.1,
-    routeRole: "service",
-    description: "靠近洗身洞的服务点，作为行程中的安全设施定位。",
-    introduction: "医疗点不需要被当作游览目标，但应在随行模式中可见。它为后续接入服务时间和应急流程保留了位置。",
-    highlights: ["游线中段附近的安全设施定位", "可作为高德设施步行规划的目的地"],
-    tip: "原型不显示服务能力或营业状态；出现身体不适时应优先遵循景区现场指引。",
-    location: [103.82818, 32.745855],
-    coordinateNote: "高德 POI 坐标",
-    tint: "#efc0b9",
-  },
-  {
-    id: "jinsha-pudi",
-    name: "金沙铺地",
-    aliases: ["金沙铺地", "金沙铺地池"],
-    category: "钙华景观",
-    kind: "scenic",
-    minutes: 20,
-    effort: 1,
-    rank: 7,
-    routeOrder: 4,
-    routeRole: "spine",
-    description: "浅色钙华台地与水流交错的开阔段，适合用更从容的节奏观察。",
-    introduction: "金沙铺地用舒展的台地形态建立了中段的开阔感。对想保留一处从容停留的游客，它是很好的选择。",
-    highlights: ["开阔的钙华台地和水流景观", "在核心彩池前提供一段节奏缓冲"],
-    tip: "原型定位使用临近休息亭坐标，适合用于路线表达，不应用作精确集合或安全导航。",
-    location: [103.829811, 32.745359],
-    coordinateNote: "原型定位点：金沙铺地休息亭附近",
-    tint: "#f4d778",
-  },
-  {
-    id: "mirror-pond",
-    name: "明镜倒影池",
-    aliases: ["明镜倒影池", "倒影池", "明镜池"],
-    category: "彩池",
-    kind: "scenic",
-    minutes: 18,
-    effort: 1,
-    rank: 6,
-    routeOrder: 5,
-    routeRole: "spine",
-    description: "适合慢下来观察水面与周边景观关系的彩池段。",
-    introduction: "明镜倒影池作为中后段的静观节点，提供了和大尺度钙华台地不同的观看方式。",
-    highlights: ["更适合观察水面层次的停留点", "可作为进入核心彩池前的中途节点"],
-    tip: "原型定位使用临近休息亭坐标；名称与点位在正式版应由景区目录继续校验。",
-    location: [103.832644, 32.743202],
-    coordinateNote: "原型定位点：明镜倒影池休息亭附近",
-    tint: "#9bded7",
-  },
-  {
-    id: "zhengyan-chi",
-    name: "争艳彩池",
-    aliases: ["争艳池", "争艳彩池", "争艳彩池群"],
-    category: "彩池",
-    kind: "scenic",
-    minutes: 25,
-    effort: 2,
-    rank: 9,
-    routeOrder: 6,
-    routeRole: "spine",
-    description: "层叠彩池密集，是希望感受黄龙水色层次时的核心停留。",
-    introduction: "争艳彩池优先级较高，因为它以密集的彩池层次提供了明确的游览价值。时间紧张时，规划器会倾向保留它。",
-    highlights: ["彩池层次集中，适合完整观看", "作为时间取舍中的高优先级节点"],
-    tip: "建议留出拍照与缓步观察时间；高海拔环境下请根据自己的体感调整节奏。",
-    location: [103.833738, 32.738781],
-    coordinateNote: "高德 POI 坐标",
-    tint: "#9ee1d8",
-  },
-  {
-    id: "huanglong-middle-temple",
-    name: "黄龙中寺",
-    aliases: ["黄龙中寺", "中寺"],
-    category: "人文自然",
-    kind: "scenic",
-    minutes: 20,
-    effort: 2,
-    rank: 5,
-    routeOrder: 7,
-    routeRole: "spine",
-    description: "游线中后段的人文节点，为自然景观之间增加不同的停留理由。",
-    introduction: "中寺让游线从单一景观浏览转为自然与人文交替的体验。适合偏好慢行与多样内容的游客。",
-    highlights: ["自然景观中的人文停留节点", "适合深度节奏的路线安排"],
-    tip: "尊重现场秩序与环境；开放情况和可进入区域应以现场管理要求为准。",
-    location: [103.834268, 32.730684],
-    coordinateNote: "高德 POI 坐标",
-    tint: "#cfbf91",
-  },
-  {
-    id: "huanglong-ancient-temple",
-    name: "黄龙古寺",
-    aliases: ["黄龙古寺", "古寺", "黄龙寺"],
-    category: "人文自然",
-    kind: "scenic",
-    minutes: 30,
-    effort: 2,
-    rank: 7,
-    routeOrder: 8,
-    routeRole: "spine",
-    description: "位于游线高段的人文停留点，适合把它放入深度游览的节奏中。",
-    introduction: "古寺适合愿意为人文内容留出时间的游客。它与五彩池相邻，但在时间有限时可由规划器解释是否留白。",
-    highlights: ["高段游线中的人文目标", "与核心彩池可形成不同风格的停留组合"],
-    tip: "若总可用时间较短，先确认五彩池等核心目标，再决定是否安排完整停留。",
-    location: [103.835029, 32.724665],
-    coordinateNote: "高德 POI 坐标",
-    tint: "#cfbf91",
-  },
-  {
-    id: "five-color-pond",
-    name: "五彩池",
-    aliases: ["五彩池", "黄龙五彩池", "五彩池群"],
-    category: "彩池",
-    kind: "scenic",
-    minutes: 45,
-    effort: 3,
-    rank: 10,
-    routeOrder: 9,
-    routeRole: "spine",
-    description: "高优先级核心 POI，建议留出完整停留时间感受彩池层次。",
-    introduction: "五彩池是原型中权重最高的核心景观。规划器会优先保留它，并把其他选择的取舍说清楚。",
-    highlights: ["黄龙游览愿望清单中的核心节点", "适合留出较完整的观察和拍照时间"],
-    tip: "高段行程需同时考虑返程缓冲、天气和体力；原型停留时长不是官方游览建议。",
-    location: [103.834717, 32.722579],
-    coordinateNote: "原型定位点：五彩池休息亭附近",
-    tint: "#64c8ce",
-  },
-  {
-    id: "five-color-pond-rest-stop",
-    name: "五彩池休息亭",
-    aliases: ["五彩池休息亭", "休息亭"],
-    category: "休息设施",
-    kind: "service",
-    minutes: 10,
-    effort: 0,
-    rank: 2,
-    routeOrder: 9.1,
-    routeRole: "service",
-    description: "核心景观附近的服务定位点，为后续补水、休息与设施状态提示预留接口。",
-    introduction: "服务设施被纳入目录后，随行模式可以围绕游客实际需要补充休息与安全信息，而不是只展示景点。",
-    highlights: ["核心景观附近的休息定位", "可扩展为休息、补给与拥挤提示"],
-    tip: "当前仅作为位置示意，设施可用性和服务状态需要景区数据源支持。",
-    location: [103.834717, 32.722579],
-    coordinateNote: "高德 POI 坐标",
-    tint: "#d8d8c2",
-  },
+    "id": "five-color-pond-rest-stop",
+    "name": "五彩池休息亭",
+    "aliases": [
+      "五彩池休息亭",
+      "休息亭"
+    ],
+    "category": "休息设施",
+    "kind": "service",
+    "minutes": 10,
+    "effort": 0,
+    "rank": 2,
+    "routeOrder": 9.1,
+    "routeRole": "service",
+    "description": "核心景观附近的服务定位点，为后续补水、休息与设施状态提示预留接口。",
+    "introduction": "服务设施被纳入目录后，随行模式可以围绕游客实际需要补充休息与安全信息，而不是只展示景点。",
+    "highlights": [
+      "核心景观附近的休息定位",
+      "可扩展为休息、补给与拥挤提示"
+    ],
+    "tip": "当前仅作为位置示意，设施可用性和服务状态需要景区数据源支持。",
+    "location": [
+      103.834717,
+      32.722579
+    ],
+    "coordinateNote": "高德 POI 坐标",
+    "tint": "#d8d8c2"
+  }
+]
 ];
 
 const appState = {
   activeView: "map",
+  discoverQuery: "",
+  discoverCategory: "all",
   selectedPoiIds: new Set(["welcome-pond", "zhengyan-chi", "five-color-pond"]),
   completedPoiIds: new Set(),
   candidates: [],
@@ -440,38 +342,41 @@ function refreshIcons() {
   if (window.lucide) window.lucide.createIcons();
 }
 
+const SCENIC_FILTERS = [['all','全部景点'],['pond','彩池'],['waterfall','瀑布'],['landform','地貌'],['culture','人文'],['selected','已加入']];
+
+function filteredScenicPois() {
+  const query=normalizeText(appState.discoverQuery);
+  return POIS.filter(p=>p.kind==='scenic')
+    .filter(p=>appState.discoverCategory==='all'||(appState.discoverCategory==='selected'?appState.selectedPoiIds.has(p.id):p.collection===appState.discoverCategory))
+    .filter(p=>!query||normalizeText([p.name,...p.aliases,p.description,p.tagline,p.area].join(' ')).includes(query))
+    .sort((a,b)=>a.routeOrder-b.routeOrder);
+}
+
+function scenicVisual(poi, detail=false) {
+  return `<span class="scenic-art art-${html(poi.collection)}" aria-hidden="true"></span>${poi.image?`<img class="scenic-image" src="${html(poi.image.url)}" alt="${html(poi.name)}景观" loading="${detail?'eager':'lazy'}" decoding="async" referrerpolicy="no-referrer" /><span class="scenic-image-fallback">配图暂未加载</span>`:'<span class="scenic-illustration-label">景观示意</span>'}`;
+}
+
 function renderDiscover() {
   const poiGrid = document.querySelector("#poiGrid");
   const count = appState.selectedPoiIds.size;
   document.querySelector("#selectionCount").textContent = `${count} 已加入`;
 
-  poiGrid.innerHTML = POIS.filter((poi) => poi.kind === "scenic").map((poi) => {
+  document.querySelector('#discoverFilters').innerHTML=SCENIC_FILTERS.map(([id,label])=>`<button type="button" data-scenic-filter="${id}" class="${appState.discoverCategory===id?'active':''}" aria-pressed="${appState.discoverCategory===id}">${label}</button>`).join('');
+  const scenic=filteredScenicPois();
+  document.querySelector('#discoverResultCount').textContent=`${scenic.length} 处景点 · 点卡片看介绍，点 + 加入行程`;
+  poiGrid.innerHTML = scenic.map((poi) => {
     const isSelected = appState.selectedPoiIds.has(poi.id);
-    const typeLabel = poi.kind === "service" ? "设施" : "景观";
     return `
-      <article class="poi-card ${isSelected ? "selected" : ""}" data-poi-card-id="${poi.id}" tabindex="0" style="--poi-tint: ${poi.tint}">
-        <div class="poi-card-content">
-          <div class="poi-meta">
-            <span class="poi-category">${typeLabel} / ${poi.category}</span>
-            <span class="effort">${effortLabel(poi.effort)}</span>
-          </div>
-          <h3>${poi.name}</h3>
-          <p>${poi.description}</p>
-          <div class="poi-foot">
-            <span class="poi-minutes">建议停留 ${poi.minutes} 分钟</span>
-            <div class="poi-card-actions">
-              <button class="poi-detail-trigger" type="button" data-poi-detail-id="${poi.id}" aria-label="查看${poi.name}介绍">
-                查看介绍 <i data-lucide="arrow-up-right" aria-hidden="true"></i>
-              </button>
-              <button class="poi-select ${isSelected ? "selected" : ""}" type="button" data-poi-id="${poi.id}" aria-pressed="${isSelected}">
-                <i data-lucide="${isSelected ? "circle-check-big" : "plus-circle"}" aria-hidden="true"></i>
-                ${isSelected ? "已加入" : "加入行程"}
-              </button>
-            </div>
-          </div>
-        </div>
+      <article class="poi-card ${isSelected ? "selected" : ""}" data-poi-card-id="${poi.id}" style="--poi-tint:${poi.tint}">
+        <button class="poi-open" type="button" data-poi-detail-id="${poi.id}" aria-label="查看${html(poi.name)}介绍">
+          ${scenicVisual(poi)}
+          <span class="poi-card-shade" aria-hidden="true"></span>
+          <span class="poi-area">${html(poi.area)}</span>
+          <span class="poi-card-copy"><span class="poi-title">${html(poi.name)}</span><span class="poi-tagline">${html(poi.tagline)}</span><span class="poi-card-bottom">约 ${poi.minutes} 分钟 <i data-lucide="arrow-up-right" aria-hidden="true"></i></span></span>
+        </button>
+        <button class="poi-select ${isSelected ? "selected" : ""}" type="button" data-poi-id="${poi.id}" aria-label="${isSelected?'移出':'加入'}${html(poi.name)}${isSelected?'行程':'到行程'}" aria-pressed="${isSelected}"><i data-lucide="${isSelected?'check':'plus'}" aria-hidden="true"></i></button>
       </article>`;
-  }).join("");
+  }).join("") || '<div class="discover-empty"><strong>暂时没有匹配的景点</strong><p>试试别名，或回到全部景点继续挑选。</p><button type="button" data-reset-discover>查看全部景点</button></div>';
 }
 
 function renderCandidates() {
@@ -631,6 +536,9 @@ function clearShortageMode() {
 }
 
 function togglePoi(id) {
+  const focused=document.activeElement;
+  const fromGrid=focused?.matches('#poiGrid [data-poi-id]');
+  const focusIndex=fromGrid?[...document.querySelectorAll('#poiGrid [data-poi-id]')].indexOf(focused):-1;
   if (appState.selectedPoiIds.has(id)) {
     appState.selectedPoiIds.delete(id);
     appState.completedPoiIds.delete(id);
@@ -639,6 +547,11 @@ function togglePoi(id) {
   }
   clearShortageMode();
   renderAll();
+  if(fromGrid){
+    const remaining=[...document.querySelectorAll('#poiGrid [data-poi-id]')];
+    const next=document.querySelector(`#poiGrid [data-poi-id="${id}"]`)||remaining[Math.min(focusIndex,remaining.length-1)]||document.querySelector('[data-scenic-filter="selected"]');
+    next?.focus({preventScroll:true});
+  }
 }
 
 function addCandidate(id) {
@@ -648,11 +561,28 @@ function addCandidate(id) {
 }
 
 function bindEvents() {
+  document.addEventListener('error',event=>{
+    if(event.target.matches?.('img.scenic-image')){
+      event.target.hidden=true;
+      event.target.parentElement.classList.add('image-error');
+    }
+  },true);
+  document.querySelector('#discoverSearch').addEventListener('input',event=>{
+    appState.discoverQuery=event.target.value;renderDiscover();refreshIcons();
+  });
   document.querySelectorAll("[data-view]").forEach((button) => {
     button.addEventListener("click", () => setActiveView(button.dataset.view));
   });
 
   document.addEventListener("click", (event) => {
+    const scenicFilter=event.target.closest('[data-scenic-filter]');
+    if(scenicFilter){
+      appState.discoverCategory=scenicFilter.dataset.scenicFilter;renderDiscover();refreshIcons();
+      document.querySelector(`[data-scenic-filter="${appState.discoverCategory}"]`)?.focus({preventScroll:true});return;
+    }
+    if(event.target.closest('[data-reset-discover]')){
+      appState.discoverCategory='all';appState.discoverQuery='';document.querySelector('#discoverSearch').value='';renderDiscover();refreshIcons();document.querySelector('#discoverSearch').focus({preventScroll:true});return;
+    }
     const action = event.target.closest("[data-action]")?.dataset.action;
     const actionMap = {
       "go-discover": "discover",

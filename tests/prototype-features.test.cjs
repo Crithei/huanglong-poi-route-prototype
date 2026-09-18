@@ -10,8 +10,9 @@ function loadPrototypeApi() {
   source = source.replace(/bindEvents\(\);\s*renderAll\(\);\s*$/, "");
   source += "\nglobalThis.__prototypeTestApi = { POIS, buildPlan };";
 
-  const context = { console };
+  const context = { console, window:{} };
   vm.createContext(context);
+  vm.runInContext(fs.readFileSync(path.join(__dirname,'..','data/scenic.js'),'utf8'),context);
   vm.runInContext(source, context);
   return context.__prototypeTestApi;
 }

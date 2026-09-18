@@ -16,6 +16,7 @@
     <script defer src="https://webapi.amap.com/loader.js"></script>
     <script defer src="assets/lucide-0.468.0.min.js"></script>
     <script defer src="data/facilities.js"></script>
+    <script defer src="data/scenic.js"></script>
     <script defer src="map.js"></script>
     <script defer src="app.js"></script>
   </head>
@@ -66,7 +67,12 @@
             <span class="selection-count" id="selectionCount">0 已加入</span>
           </div>
 
-          <div class="poi-grid" id="poiGrid" aria-live="polite"></div>
+          <div class="discover-tools">
+            <label class="discover-search" for="discoverSearch"><i data-lucide="search" aria-hidden="true"></i><input id="discoverSearch" type="search" placeholder="找景点、看点或别名" autocomplete="off" /><span class="visually-hidden">搜索景点</span></label>
+            <div class="discover-filters" id="discoverFilters" role="group" aria-label="按景观类型筛选"></div>
+            <p class="discover-result-count" id="discoverResultCount" role="status"></p>
+          </div>
+          <div class="poi-grid" id="poiGrid"></div>
 
           <section class="infrastructure-strip" aria-label="查找沿途设施">
             <div>
@@ -308,9 +314,13 @@
               <i data-lucide="x" aria-hidden="true"></i>
             </button>
           </div>
+          <div class="poi-dialog-cover" id="poiDialogCover" hidden></div>
           <h2 id="poiDialogTitle"></h2>
           <p class="poi-dialog-summary" id="poiDialogSummary"></p>
           <div class="poi-dialog-facts" id="poiDialogFacts"></div>
+          <section class="poi-dialog-section scenic-story" id="poiStorySection" hidden>
+            <h3>走近这处风景</h3><div id="poiDialogStory"></div>
+          </section>
           <section class="poi-dialog-section">
             <h3 id="poiHighlightsHeading">为什么值得停留</h3>
             <ul id="poiDialogHighlights"></ul>
@@ -319,6 +329,10 @@
             <h3 id="poiTipHeading">这次怎么安排</h3>
             <p id="poiDialogTip"></p>
           </section>
+          <section class="poi-dialog-section" id="poiPhotoSection" hidden>
+            <h3>试试这样看与拍</h3><p id="poiDialogPhotoTip"></p>
+          </section>
+          <details class="poi-sources" id="poiSourcesSection" hidden><summary>资料来源与图片说明</summary><div id="poiDialogSources"></div></details>
           <div class="poi-dialog-actions">
             <button class="quiet-command" id="focusPoiOnMap" type="button">
               <i data-lucide="locate-fixed" aria-hidden="true"></i>

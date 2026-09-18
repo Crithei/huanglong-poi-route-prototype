@@ -344,6 +344,18 @@ function renderPoiDialog(id) {
   document.querySelector('#poiDialogCategory').textContent=`${service?'沿途设施':'黄龙景点'} / ${poi.category}`;
   document.querySelector('#poiDialogTitle').textContent=poi.name;
   document.querySelector('#poiDialogSummary').textContent=poi.introduction;
+  const cover=document.querySelector('#poiDialogCover');
+  cover.hidden=service;
+  cover.classList.remove('image-error');
+  cover.style.setProperty('--poi-tint',poi.tint);
+  cover.innerHTML=service?'':scenicVisual(poi,true);
+  document.querySelector('#poiStorySection').hidden=service;
+  document.querySelector('#poiDialogStory').innerHTML=service?'':(poi.story||[]).map(p=>`<p>${html(p)}</p>`).join('');
+  document.querySelector('#poiPhotoSection').hidden=service;
+  document.querySelector('#poiDialogPhotoTip').textContent=poi.photoTip||'';
+  const sources=document.querySelector('#poiSourcesSection');
+  sources.hidden=service;sources.open=false;
+  document.querySelector('#poiDialogSources').innerHTML=service?'':`<p>资料核对：${html(poi.checkedAt)}。景观介绍为资料整理，停留时间与拍照方法为编辑建议。</p><ul>${(poi.sources||[]).map(s=>`<li><a href="${html(s.url)}" target="_blank" rel="noopener noreferrer">${html(s.title)}</a><span>${html(s.note||'')}</span></li>`).join('')}</ul>${poi.image?`<p>图片：<a href="${html(poi.image.sourceUrl)}" target="_blank" rel="noopener noreferrer">${html(poi.image.credit)}</a>。资料图不代表当天水量、花期或开放状态。</p>`:'<p>配图为抽象景观示意，不是景点实拍。</p>'}`;
   document.querySelector('#poiDialogFacts').innerHTML=service?
     `<span><i data-lucide="map-pin" aria-hidden="true"></i>${html(poi.address||'黄龙景区')}</span><span><i data-lucide="clock-3" aria-hidden="true"></i>${poi.openingHours?`资料开放时间 ${html(poi.openingHours)}`:'开放时间未提供'}</span>${poi.phone?`<a href="tel:${html(poi.phone.split(';')[0])}"><i data-lucide="phone" aria-hidden="true"></i>${html(poi.phone.split(';')[0])}</a>`:''}`:
     `<span><i data-lucide="clock-3" aria-hidden="true"></i>建议停留 ${poi.minutes} 分钟</span><span><i data-lucide="footprints" aria-hidden="true"></i>${effortLabel(poi.effort)}</span><span><i data-lucide="map-pin" aria-hidden="true"></i>${html(poi.coordinateNote)}</span>`;
@@ -364,7 +376,7 @@ function renderPoiDialog(id) {
 function openPoiDetail(id) {
   if(!getPoi(id))return;
   appState.activePoiId=id;renderPoiDialog(id);
-  const dialog=document.querySelector('#poiDialog');if(!dialog.open)dialog.showModal();
+  const dialog=document.querySelector('#poiDialog');if(!dialog.open)dialog.showModal();dialog.scrollTop=0;
 }
 function closePoiDetail(){document.querySelector('#poiDialog').close();}
 function focusPoiOnMap(entrance=false) {
