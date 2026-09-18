@@ -8,6 +8,10 @@ runtime-config.js
 
 # Dependencies and generated development output
 node_modules/
+dist/
+.wrangler/
+.dev.vars
+.dev.vars.*
 coverage/
 test-results/
 playwright-report/

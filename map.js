@@ -115,13 +115,15 @@ function ensureAmap() {
   if (mapRuntime.initPromise) return mapRuntime.initPromise;
   if (mapRuntime.hasFailed) return Promise.resolve(null);
   const config=window.__HUANGLONG_RUNTIME_CONFIG||{};
-  if (!config.amapJsapiKey||!config.amapSecurityJsCode||!window.AMapLoader) {
-    showMapFallback('地图暂时未连接','仍可查询下方地点资料。请通过本机预览服务打开，并检查网络连接。');
+  if (!config.amapJsapiKey||(!config.amapServiceHost&&!config.amapSecurityJsCode)||!window.AMapLoader) {
+    showMapFallback('地图暂时未连接','仍可查询下方地点资料。请检查网络连接，稍后重新加载地图。');
     updateMapStatus('地图未连接','warning');
     mapRuntime.hasFailed=true;
     return Promise.resolve(null);
   }
-  window._AMapSecurityConfig={securityJsCode:config.amapSecurityJsCode};
+  window._AMapSecurityConfig=config.amapServiceHost
+    ? {serviceHost:config.amapServiceHost}
+    : {securityJsCode:config.amapSecurityJsCode};
   updateMapStatus('正在加载高德地图','loading');
   mapRuntime.initPromise=window.AMapLoader.load({key:config.amapJsapiKey,version:'2.0',plugins:['AMap.Scale','AMap.Walking']}).then(AMap=>{
     AMap.getConfig().appname = 'amap-jsapi-skill';

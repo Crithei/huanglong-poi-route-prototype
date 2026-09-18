@@ -4,6 +4,8 @@
 
 2026-09-18 版本以手机竖屏为主要界面，提供独立地图页、63 个景点与设施、分类搜索、入口查看和可选起终点的高德步行查询。详细布局、设施来源与验证说明见 [移动端地图与设施说明](MOBILE-MAP-GUIDE.md)。
 
+在线演示：[huanglong.phrynx.chat](https://huanglong.phrynx.chat/)。已部署至 Cloudflare，支持真实高德底图和设施步行查询；访问者无需运行本机服务。部署结构、密钥配置与更新方法见 [Cloudflare 部署说明](CLOUDFLARE.md)，部署工具需要 Node.js 22+。
+
 ## 打开原型
 
 需要本机已有 Node.js 20 或更新版本，无需安装 npm 依赖。地图需要配置下列高德开发环境变量：
@@ -35,7 +37,7 @@ node .\server.js
 
 也可使用 `npm start`。克隆仓库后不会自带密钥，需要在自己的环境中配置上述变量。设施资料快照可直接搜索；没有高德配置时地图会提示未连接。
 
-运行项目自带的四项目录与规划检查：
+运行项目自带的目录、规划与 Cloudflare 代理检查：
 
 ```powershell
 node --test tests/*.test.cjs
