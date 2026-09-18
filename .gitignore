@@ -1,0 +1,19 @@
+# Local credentials and generated runtime configuration
+.env
+.env.*
+!.env.example
+runtime-config.js
+*.pem
+*.key
+
+# Dependencies and generated development output
+node_modules/
+coverage/
+test-results/
+playwright-report/
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

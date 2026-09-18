@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="黄龙 POI 游线规划小程序原型，演示 POI 选择、地图定位、设施步行规划、游线取舍和随行调整。"
+    />
+    <title>澄路 | 黄龙游线原型</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+    <meta name="theme-color" content="#f4f8f4" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="mobile.css" />
+    <script src="runtime-config.js"></script>
+    <script defer src="https://webapi.amap.com/loader.js"></script>
+    <script defer src="assets/lucide-0.468.0.min.js"></script>
+    <script defer src="data/facilities.js"></script>
+    <script defer src="map.js"></script>
+    <script defer src="app.js"></script>
+  </head>
+  <body data-active-view="map">
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand" aria-label="澄路，黄龙游线原型">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span class="brand-name">澄路</span>
+          <span class="brand-place">黄龙</span>
+        </div>
+        <div class="prototype-badge" title="本地交互原型，不含实时景区数据">
+          <i data-lucide="flask-conical" aria-hidden="true"></i>
+          原型
+        </div>
+      </header>
+
+      <main>
+        <section class="view" id="discover-view" data-view-panel="discover" aria-labelledby="discover-title" hidden>
+          <div class="hero">
+            <div class="hero-image" role="img" aria-label="黄龙钙华彩池景观"></div>
+            <div class="hero-content">
+              <p class="eyebrow">HUANGLONG · 黄龙</p>
+              <h1 id="discover-title">把黄龙的好风景，<br />放进今天。</h1>
+              <p class="hero-copy">从景点开始，把有限的时间留给真正想看的黄龙。</p>
+              <div class="hero-actions">
+                <button class="primary-command" type="button" data-action="go-route">
+                  <i data-lucide="route" aria-hidden="true"></i>
+                  安排我的游线
+                </button>
+                <button class="quiet-command inverse" type="button" data-action="go-import">
+                  <i data-lucide="scan-text" aria-hidden="true"></i>
+                  导入攻略
+                </button>
+              </div>
+            </div>
+            <div class="hero-note">
+              <i data-lucide="mountain" aria-hidden="true"></i>
+              <span>沿彩池而行，也照顾好途中的每一次停留</span>
+            </div>
+          </div>
+
+          <div class="section-heading compact-heading">
+            <div>
+              <p class="eyebrow dark">你的愿望清单</p>
+              <h2>挑出这次想抵达的地方</h2>
+            </div>
+            <span class="selection-count" id="selectionCount">0 已加入</span>
+          </div>
+
+          <div class="poi-grid" id="poiGrid" aria-live="polite"></div>
+
+          <section class="infrastructure-strip" aria-label="查找沿途设施">
+            <div>
+              <p class="eyebrow dark">CONNECTIONS</p>
+              <h2>找一找沿途设施</h2>
+            </div>
+            <div class="facility-list">
+              <button type="button" data-open-facility="transport"><i data-lucide="tram-front" aria-hidden="true"></i>索道接驳</button>
+              <button type="button" data-open-facility="toilet"><i data-lucide="accessibility" aria-hidden="true"></i>公共厕所</button>
+              <button type="button" data-open-facility="medical"><i data-lucide="cross" aria-hidden="true"></i>医疗帮助</button>
+              <button type="button" data-open-facility="shop"><i data-lucide="store" aria-hidden="true"></i>商店补给</button>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="import-view" data-view-panel="import" aria-labelledby="import-title" hidden>
+          <div class="page-header">
+            <div>
+              <p class="eyebrow dark">IMPORT / POI ONLY</p>
+              <h1 id="import-title">从攻略里，找景点。</h1>
+            </div>
+            <button class="icon-command" type="button" data-action="go-discover" title="返回景点发现" aria-label="返回景点发现">
+              <i data-lucide="x" aria-hidden="true"></i>
+            </button>
+          </div>
+
+          <section class="import-workspace">
+            <div class="import-main">
+              <label class="field-label" for="sourceText">粘贴一段攻略文字</label>
+              <textarea id="sourceText" rows="7" placeholder="例如：如果时间有限，想去五彩池和争艳池，金沙铺地也不要错过。"></textarea>
+              <div class="field-actions">
+                <button class="quiet-command" id="fillSample" type="button">
+                  <i data-lucide="wand-sparkles" aria-hidden="true"></i>
+                  填入示例
+                </button>
+                <button class="primary-command" id="extractText" type="button">
+                  <i data-lucide="scan-text" aria-hidden="true"></i>
+                  识别 POI
+                </button>
+              </div>
+              <div class="candidate-area" id="candidateArea" aria-live="polite">
+                <p class="empty-state">识别结果会只返回黄龙目录中已有的 POI。</p>
+              </div>
+            </div>
+
+            <aside class="import-rails" aria-label="其他导入入口">
+              <div class="rail-card image-rail">
+                <div class="rail-icon"><i data-lucide="image-up" aria-hidden="true"></i></div>
+                <div>
+                  <p class="rail-title">攻略截图</p>
+                  <p class="rail-copy">原型保留入口，正式版接 OCR 后再匹配 POI。</p>
+                </div>
+                <label class="file-command" for="imageInput">
+                  <i data-lucide="upload" aria-hidden="true"></i>
+                  选择图片
+                </label>
+                <input id="imageInput" type="file" accept="image/*" hidden />
+                <p class="rail-status" id="imageStatus">未选择图片</p>
+              </div>
+              <div class="rail-card">
+                <div class="rail-icon"><i data-lucide="link" aria-hidden="true"></i></div>
+                <div>
+                  <p class="rail-title">公开攻略链接</p>
+                  <p class="rail-copy">服务端读取可公开获取的内容；受限链接将回退为文字或截图。</p>
+                </div>
+                <div class="url-row">
+                  <input id="sourceUrl" type="url" placeholder="https://..." aria-label="公开攻略链接" />
+                  <button class="icon-command" id="readUrl" type="button" title="尝试读取链接" aria-label="尝试读取链接">
+                    <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+                  </button>
+                </div>
+                <p class="rail-status" id="urlStatus">原型不访问外部链接</p>
+              </div>
+            </aside>
+          </section>
+
+          <section class="import-principle">
+            <i data-lucide="shield-check" aria-hidden="true"></i>
+            <p>导入内容只用来发现 POI。路线、设施和景点卡片来自景区目录与后续可信数据源。</p>
+          </section>
+        </section>
+
+        <section class="view active map-view" id="map-view" data-view-panel="map" aria-label="黄龙地图">
+          <div id="amapMap" class="amap-map" aria-label="可拖动和缩放的高德地图"></div>
+          <div class="map-fallback" id="mapFallback">
+            <i data-lucide="map" aria-hidden="true"></i><strong>正在展开黄龙地图</strong>
+            <span>景点与沿途设施，放在同一张地图上。</span>
+            <button id="retryMap" type="button" class="quiet-command">重新加载地图</button>
+          </div>
+          <div class="explorer-top">
+            <div class="map-searchbar">
+              <i data-lucide="search" aria-hidden="true"></i>
+              <input id="mapSearch" type="search" autocomplete="off" placeholder="搜景点、厕所、索道、小卖部" aria-label="搜索景点或设施" />
+              <button id="clearMapSearch" type="button" aria-label="清空搜索" hidden><i data-lucide="x" aria-hidden="true"></i></button>
+            </div>
+            <div class="map-categories" id="mapCategories" aria-label="地点类别"></div>
+            <span class="map-caption" id="mapCaption">黄龙沟 · 沿途设施</span>
+          </div>
+          <div class="map-tools" aria-label="地图操作">
+            <button id="zoomIn" type="button" aria-label="放大地图"><i data-lucide="plus" aria-hidden="true"></i></button>
+            <button id="zoomOut" type="button" aria-label="缩小地图"><i data-lucide="minus" aria-hidden="true"></i></button>
+            <button id="resetMapView" type="button" aria-label="查看全部当前地点"><i data-lucide="scan" aria-hidden="true"></i></button>
+            <button id="toggleMapPitch" type="button" aria-label="切换地图倾斜视角">3D</button>
+          </div>
+          <div class="map-legend"><span class="legend-line"></span>游线示意<span class="legend-line walking"></span>高德步行</div>
+          <aside class="place-sheet" id="placeSheet" data-size="peek" aria-label="地点列表与步行规划">
+            <button class="sheet-grip" id="togglePlaceSheet" type="button" aria-expanded="false" aria-label="展开地点列表"><span></span></button>
+            <div class="sheet-heading"><div><h2 id="mapResultTitle">彩池与山林之间</h2><p id="mapResultCount"></p></div><button class="sheet-size-button" id="collapsePlaceSheet" type="button" aria-label="收起地点卡片"><i data-lucide="chevron-down" aria-hidden="true"></i></button></div>
+            <div class="sheet-body" id="sheetBody">
+              <div class="map-results" id="mapResults" aria-live="polite"></div>
+              <section class="walking-panel" id="walkingPanel" hidden aria-label="步行路线规划">
+                <div class="walking-panel-title"><strong>步行怎么走</strong><button id="closeWalking" type="button" aria-label="关闭步行规划"><i data-lucide="x" aria-hidden="true"></i></button></div>
+                <label for="walkOrigin">从<select id="walkOrigin"></select></label>
+                <label for="walkDestination">到<select id="walkDestination"></select></label>
+                <p class="origin-note">起点为手动选择的地点，并非实时定位。</p>
+                <p class="origin-note coordinate-note" id="walkCoordinateNote"></p>
+                <button class="primary-command" id="planFacilityWalk" type="button"><i data-lucide="footprints" aria-hidden="true"></i>查询高德步行路线</button>
+                <p id="walkingSummary" class="walking-result" aria-live="polite">选择起终点后查询，路程与用时以高德返回结果为准。</p>
+                <div id="walkingSteps"></div>
+              </section>
+              <p class="facility-source" id="facilitySource"></p>
+            </div>
+          </aside>
+          <span class="visually-hidden" id="mapStatus" role="status" data-state="idle">等待加载</span>
+        </section>
+
+        <section class="view" id="route-view" data-view-panel="route" aria-labelledby="route-title" hidden>
+          <div class="page-header route-header">
+            <div>
+              <p class="eyebrow dark">YOUR DAY IN HUANGLONG</p>
+              <h1 id="route-title">今天，按你的节奏走。</h1>
+            </div>
+            <button class="icon-command" type="button" data-action="go-discover" title="编辑景点" aria-label="编辑景点">
+              <i data-lucide="pencil" aria-hidden="true"></i>
+            </button>
+          </div>
+
+          <section class="preference-panel" aria-label="行程偏好">
+            <div class="preference-group">
+              <span class="field-label">在景区多久</span>
+              <div class="segmented-control" id="hoursControl" role="group" aria-label="游玩时长">
+                <button type="button" data-hours="4.5">4.5h</button>
+                <button type="button" data-hours="6" class="selected">6h</button>
+                <button type="button" data-hours="8">8h</button>
+              </div>
+            </div>
+            <div class="preference-group">
+              <span class="field-label">游玩节奏</span>
+              <div class="segmented-control" id="paceControl" role="group" aria-label="游玩节奏">
+                <button type="button" data-pace="轻松">轻松</button>
+                <button type="button" data-pace="平衡" class="selected">平衡</button>
+                <button type="button" data-pace="深度">深度</button>
+              </div>
+            </div>
+            <label class="toggle-line" for="cableCar">
+              <span><i data-lucide="tram-front" aria-hidden="true"></i>考虑索道上行</span>
+              <input id="cableCar" type="checkbox" />
+              <span class="toggle-ui" aria-hidden="true"></span>
+            </label>
+          </section>
+
+          <section class="route-hero" aria-label="游线摘要">
+            <div class="route-hero-copy">
+              <p class="route-overline" id="routeStatusLabel">基于 0 个已选 POI</p>
+              <h2 id="routeHeadline">先从黄龙 POI 中挑选想去的地方。</h2>
+              <p id="routeReason">路线会根据可用时间、体力节奏和已选 POI 说明取舍。</p>
+              <div class="metric-row" id="routeMetrics"></div>
+              <button class="primary-command" id="startFollow" type="button" disabled>
+                <i data-lucide="navigation" aria-hidden="true"></i>
+                开始随行
+              </button>
+            </div>
+          </section>
+
+          <section class="route-detail-grid">
+            <div class="route-detail">
+              <div class="section-heading mini-heading">
+                <div>
+                  <p class="eyebrow dark">THIS TIME</p>
+                  <h2>会经过</h2>
+                </div>
+                <span id="includedCount">0 个节点</span>
+              </div>
+              <ol class="route-timeline" id="routeTimeline"></ol>
+            </div>
+            <div class="route-detail deferred-detail">
+              <div class="section-heading mini-heading">
+                <div>
+                  <p class="eyebrow dark">SAVE FOR LATER</p>
+                  <h2>本次留白</h2>
+                </div>
+              </div>
+              <div id="deferredList" class="deferred-list"></div>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="follow-view" data-view-panel="follow" aria-labelledby="follow-title" hidden>
+          <div class="follow-topline">
+            <span class="live-indicator"><span></span>随行模式</span>
+            <button class="icon-command" type="button" data-action="go-route" title="返回游线" aria-label="返回游线">
+              <i data-lucide="map" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div class="follow-stage">
+            <p class="eyebrow">NEXT / HUANGLONG</p>
+            <p class="follow-kicker" id="followProgressText">准备开始</p>
+            <h1 id="followTitle">还没有可跟随的游线。</h1>
+            <p class="follow-description" id="followDescription">返回游线页选择 POI 后开始。</p>
+            <div class="follow-meter" aria-label="路线完成进度"><span id="followMeter"></span></div>
+            <p class="meter-copy" id="followMeterCopy">0 / 0 已完成</p>
+          </div>
+          <div class="follow-route-strip" id="followRouteStrip" aria-label="剩余路线"></div>
+          <div class="follow-actions">
+            <button class="quiet-command" id="shortenRoute" type="button" disabled>
+              <i data-lucide="timer-off" aria-hidden="true"></i>
+              时间不足
+            </button>
+            <button class="primary-command" id="completeStop" type="button" disabled>
+              <i data-lucide="check" aria-hidden="true"></i>
+              已到达
+            </button>
+          </div>
+          <section class="state-panel" aria-label="原型状态">
+            <button class="state-toggle" id="stateToggle" type="button" aria-expanded="false">
+              <span><i data-lucide="braces" aria-hidden="true"></i>查看原型状态</span>
+              <i data-lucide="chevron-down" aria-hidden="true"></i>
+            </button>
+            <pre id="stateOutput" hidden></pre>
+          </section>
+        </section>
+      </main>
+
+      <dialog class="poi-dialog" id="poiDialog" aria-labelledby="poiDialogTitle">
+        <div class="poi-dialog-shell">
+          <div class="poi-dialog-topline">
+            <span class="poi-dialog-category" id="poiDialogCategory"></span>
+            <button class="icon-command" id="poiDialogClose" type="button" title="关闭介绍" aria-label="关闭介绍">
+              <i data-lucide="x" aria-hidden="true"></i>
+            </button>
+          </div>
+          <h2 id="poiDialogTitle"></h2>
+          <p class="poi-dialog-summary" id="poiDialogSummary"></p>
+          <div class="poi-dialog-facts" id="poiDialogFacts"></div>
+          <section class="poi-dialog-section">
+            <h3 id="poiHighlightsHeading">为什么值得停留</h3>
+            <ul id="poiDialogHighlights"></ul>
+          </section>
+          <section class="poi-dialog-section">
+            <h3 id="poiTipHeading">这次怎么安排</h3>
+            <p id="poiDialogTip"></p>
+          </section>
+          <div class="poi-dialog-actions">
+            <button class="quiet-command" id="focusPoiOnMap" type="button">
+              <i data-lucide="locate-fixed" aria-hidden="true"></i>
+              定位到地图
+            </button>
+            <button class="primary-command" id="togglePoiFromDialog" type="button"></button>
+          </div>
+        </div>
+      </dialog>
+
+      <nav class="bottom-nav" aria-label="主导航">
+        <button class="nav-item" type="button" data-view="discover">
+          <i data-lucide="sparkles" aria-hidden="true"></i><span>发现</span>
+        </button>
+        <button class="nav-item active" type="button" data-view="map" aria-current="page">
+          <i data-lucide="map" aria-hidden="true"></i><span>地图</span>
+        </button>
+        <button class="nav-item" type="button" data-view="route">
+          <i data-lucide="route" aria-hidden="true"></i><span>游线</span>
+        </button>
+        <button class="nav-item" type="button" data-view="follow">
+          <i data-lucide="navigation" aria-hidden="true"></i><span>随行</span>
+        </button>
+      </nav>
+    </div>
+  </body>
+</html>
