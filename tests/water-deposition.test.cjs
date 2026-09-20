@@ -65,6 +65,73 @@ test('completed ponds retain water and flowing overflow while the next pond wait
   m.dispose();
 });
 
+test('one waterdrop travels to each empty pond and waits at the completed pond between cycles',async()=>{
+  const {POOLS}=await import('../src/water-landscape.mjs');
+  const m=await scene();
+  assert.ok(m.dragSource?.isObject3D,'the renderer needs a draggable protagonist');
+  assert.equal(m.drop,m.dragSource);assert.ok(m.drop.getObjectByName('water-drop-body'));
+  assert.ok(m.dropTarget?.isObject3D,'the next empty area must expose a world-space target');
+  const sameDrop=m.drop;
+  for(const sequence of [0,3,6]){
+    settle(m,sequence);
+    const index=sequence/3,previous=POOLS[index+2],next=POOLS[index+3];
+    assert.equal(m.drop.visible,true);assert.equal(m.dropTarget.visible,true);
+    assert.equal(m.drop.position.x,previous.x);assert.equal(m.drop.position.z,previous.z);
+    assert.equal(m.dropTarget.position.x,next.x);assert.equal(m.dropTarget.position.z,next.z);
+    const before=m.drop.position.clone();
+    m.update(0,{...state(sequence,0,true),travel:0},0,true);
+    assert.ok(m.drop.position.distanceTo(before)<1e-9,'starting a cycle must not teleport to the next pond');
+    assert.equal(m.dropTarget.visible,false);
+    m.update(0,{...state(sequence,0,true),travel:.5},0,true);
+    assert.ok(m.drop.position.z>previous.z&&m.drop.position.z<next.z,'the drop passes through the gap');
+    assert.equal(part(m,index+1,'assembly').visible,false,'the future pond remains absent during travel');
+    m.update(0,{...state(sequence,0,true),travel:1},0,true);
+    assert.equal(m.drop.position.x,next.x);assert.equal(m.drop.position.z,next.z);
+    const landed=m.drop.position.clone();
+    settle(m,sequence+1,.5,true);assert.ok(m.drop.position.distanceTo(landed)<1e-9);
+    settle(m,sequence+3);assert.ok(m.drop.position.distanceTo(landed)<1e-9,'finishing a pond must retain the current anchor');
+    assert.equal(m.drop,sameDrop,'all pond cycles keep the same protagonist');
+  }
+  assert.equal(m.dropTarget.visible,false);assert.equal(m.drop.visible,true);
+  assert.equal(m.drop.position.x,POOLS[5].x);assert.equal(m.drop.position.z,POOLS[5].z);
+  m.dispose();
+});
+
+test('external drag transforms cannot poison the waterdrop animation and old saves land correctly',async()=>{
+  const {POOLS}=await import('../src/water-landscape.mjs');
+  const m=await scene();
+  assert.ok(m.dragSource?.isObject3D);
+  settle(m,3);const anchor=m.dragSource.position.clone();
+  m.dragSource.position.set(100,100,100);
+  m.update(0,state(3),1/60);
+  assert.ok(m.dragSource.position.distanceTo(anchor)<1e-9,'model easing must use an internal position, not the dragged object');
+  settle(m,3,0,true);
+  assert.equal(m.dragSource.position.x,POOLS[4].x);assert.equal(m.dragSource.position.z,POOLS[4].z,'old running saves without travel are already landed');
+  m.update(0,{...state(3,.2,true),travel:0},0,true);
+  assert.equal(m.dragSource.position.z,POOLS[4].z,'a started rim phase overrides stale travel');
+  settle(m,0);assert.equal(m.dropTarget.visible,true);assert.equal(m.dragSource.position.z,POOLS[2].z);
+  m.dispose();
+});
+
+test('accepted drag has a stable hover landing above the terrain target throughout travel',async()=>{
+  const m=await scene();
+  assert.ok(m.dropLanding?.isObject3D);
+  assert.equal(m.dropLanding.parent,m.root);
+  for(const sequence of [0,3,6]){
+    m.update(1.25,state(sequence),0,true);
+    const landing=m.dropLanding.position.clone();
+    assert.equal(landing.x,m.dropTarget.position.x);assert.equal(landing.z,m.dropTarget.position.z);
+    assert.ok(landing.y>m.dropTarget.position.y+.6,'successful drops hover above the ground');
+    for(const travel of [0,.4,1]){
+      m.update(1.25,{...state(sequence,0,true),travel},0,true);
+      assert.ok(m.dropLanding.position.distanceTo(landing)<1e-9,'the destination remains stable during flight');
+    }
+    assert.ok(m.drop.position.distanceTo(landing)<1e-9,'the landing anchor includes the same hover bob');
+  }
+  settle(m,9);assert.ok(m.dropLanding.position.distanceTo(m.drop.position)<1e-9);
+  m.dispose();
+});
+
 test('scene stays finite, settles deterministically, and disposes each resource once',async()=>{
   const m=await scene();
   for(const time of [0,.016,60,10000])for(let sequence=0;sequence<=9;sequence++)m.update(time,state(sequence,.5,true),.016);

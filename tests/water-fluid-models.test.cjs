@@ -37,6 +37,22 @@ test('CO2 charge automatically dissolves rocks over time and releases carried so
   assert.ok(solute.children[0].position.distanceTo(position)>.01);model.dispose();
 });
 
+test('modeled CO2 cloud is a separate drag anchor and dissolves into the protagonist on the chapter clock',async()=>{
+  const model=await scene('dissolution'),cloud=model.dragSource,drop=model.dropTarget;
+  assert.ok(cloud?.isGroup,'CO2 has a modeled drag source');assert.equal(cloud.parent,model.root);assert.notEqual(cloud,drop);
+  model.update(0,{charged:false,elapsed:0},0,true);
+  assert.ok(cloud.position.x>drop.position.x+2,'cloud waits separately at the right side');
+  const start=cloud.position.clone(),scale=cloud.scale.x;let meshes=0;cloud.traverse(o=>{if(o.isMesh)meshes++;});assert.ok(meshes>=5,'cloud has a faceted gas cluster');
+  model.update(.6,{charged:true,elapsed:.6},0,true);assert.ok(cloud.position.distanceTo(drop.position)<start.distanceTo(drop.position));assert.ok(cloud.scale.x<scale);
+  assert.equal(named(model,'dissolution-co2-wisps').visible,true);
+  const chargedPose=[...cloud.position.toArray(),...cloud.scale.toArray(),...cloud.rotation.toArray().slice(0,3)];
+  cloud.position.set(300,400,500);model.update(18,{charged:true,elapsed:.6},0,true);
+  assert.deepEqual([...cloud.position.toArray(),...cloud.scale.toArray(),...cloud.rotation.toArray().slice(0,3)],chargedPose,'charge uses chapter elapsed, independently of renderer drag overrides or render time');
+  model.update(1,{charged:true,elapsed:1},0,true);assert.equal(cloud.visible,false);assert.equal(cloud.scale.x,0,'absorption finishes at exactly one second');
+  model.update(8,{charged:true,elapsed:8},0,true);assert.equal(cloud.visible,false);assert.equal(named(model,'dissolution-co2-wisps').visible,false);
+  model.update(0,{charged:false,elapsed:0},0,true);assert.equal(cloud.visible,true);assert.deepEqual(cloud.position.toArray(),start.toArray(),'replay restores the floating cloud');model.dispose();
+});
+
 test('mountain spring responds only to water table crossing 65 and continues after completion',async()=>{
   const model=await scene('emergence');assert.deepEqual(model.interactables,[]);assert.deepEqual(model.markers,[]);
   assert.ok(named(model,'mountain-cutaway'));const spring=named(model,'emergence-spring'),table=named(model,'emergence-water-table');

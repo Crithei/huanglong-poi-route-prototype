@@ -51,3 +51,15 @@ test('deposition pauses between ponds and cannot fill a pool before its rim',()=
  f.playChapter(s,'deposition','start');advance(s,'deposition',1);assert.equal(s.chapters.deposition.sequence,0);assert.ok(s.chapters.deposition.fraction>0);
  advance(s,'deposition',20);assert.equal(s.chapters.deposition.sequence,3);assert.equal(s.chapters.deposition.running,false);assert.equal(s.chapters.deposition.won,false);
 });
+
+test('the travelling drop reaches the next area before a rim grows, including after reload',()=>{
+ const s=f.create();f.checkIn(s,'five-color-pond',ids);f.playChapter(s,'deposition','start');
+ assert.equal(s.chapters.deposition.travel,0);
+ f.tickChapter(s,'deposition',.25);assert.ok(s.chapters.deposition.travel>0&&s.chapters.deposition.travel<1);
+ assert.equal(s.chapters.deposition.fraction,0);assert.equal(f.playChapter(s,'deposition','start').ok,false);
+ const restored=f.restore(JSON.stringify(s),ids);assert.equal(restored.chapters.deposition.travel,s.chapters.deposition.travel);
+ f.tickChapter(restored,'deposition',.25);f.tickChapter(restored,'deposition',.25);assert.equal(restored.chapters.deposition.travel,1);assert.equal(restored.chapters.deposition.fraction,0);
+ f.tickChapter(restored,'deposition',.1);assert.ok(restored.chapters.deposition.fraction>0);
+ delete s.chapters.deposition.travel;const legacy=f.restore(JSON.stringify(s),ids);assert.equal(legacy.chapters.deposition.travel,1,'existing running saves continue without a new travel stage');
+ assert.equal(s.completed.length,0);assert.equal(Object.keys(s.stamps).length,1);
+});

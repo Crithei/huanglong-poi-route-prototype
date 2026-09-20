@@ -6,7 +6,7 @@
     {id:'emergence',label:'出露',title:'穿过裂隙，重新遇见天空',poiIds:['flying-waterfall','liantai-fall'],icon:'waves',reward:'寻泉者'},
     {id:'deposition',label:'沉积',title:'留下微小的一层，长成彩池',poiIds:['five-color-pond','zhengyan-chi','bonsai-pond'],icon:'layers',reward:'彩池营造者'},
   ].map(c=>Object.freeze({...c,poiIds:Object.freeze(c.poiIds)})));
-  const blankChapter=id=>({won:false,earnedAt:null,...({flow:{channels:[0,0,0],runoff:0},dissolution:{charged:false,elapsed:0},emergence:{level:0,exposure:0},deposition:{sequence:0,fraction:0,running:false}}[id])});
+  const blankChapter=id=>({won:false,earnedAt:null,...({flow:{channels:[0,0,0],runoff:0},dissolution:{charged:false,elapsed:0},emergence:{level:0,exposure:0},deposition:{sequence:0,fraction:0,running:false,travel:1}}[id])});
   const create=()=>({version:3,selected:null,preferences:preferences(),arrived:null,completed:[],stamps:{},gameStep:0,growth:0,waterBadge:false,waterBadgeAt:null,activeChapter:'flow',chapters:Object.fromEntries(CHAPTERS.map(c=>[c.id,blankChapter(c.id)])),chapterBadgeAt:null});
   function checkIn(s,id,allowed){if(!allowed.includes(id)||s.stamps[id])return false;s.stamps[id]=new Date().toISOString();return true;}
   function arrive(s,id,allowed){if(!allowed.includes(id)||s.completed.includes(id)||s.arrived===id)return false;s.arrived=id;checkIn(s,id,allowed);return true;}
@@ -23,7 +23,7 @@
     if(id==='flow'&&action==='turn'&&index){p.channels[value]=1-p.channels[value];if(!p.won&&!flowConnected(p))p.runoff=0;return result(true,flowConnected(p)?'水路接通了，跟着径流看看它怎样进入地下。':'水源一直在流动，转动水槽改变它的去向。');}
     if(id==='dissolution'&&action==='charge'&&!p.charged){p.charged=true;return result(true,'水带上了 CO₂。看看石灰岩如何缓慢溶解，溶解物随水迁移。');}
     if(id==='emergence'&&action==='level'&&typeof value==='number'&&Number.isFinite(value)&&value>=0&&value<=100){p.level=value;if(value<65&&!p.won)p.exposure=0;return result(true,value>=65?'地下水到达出露高度。看泉水涌出、气泡缓缓逸散。':'慢慢抬升水位，观察山体剖面中的含水空间。');}
-    if(id==='deposition'&&action==='start'&&!p.won&&!p.running&&p.sequence<9&&p.sequence%3===0){p.running=true;return result(true,'先长出池沿，再让水蓄满，最后溢向下一片低处。');}
+    if(id==='deposition'&&action==='start'&&!p.won&&!p.running&&p.sequence<9&&p.sequence%3===0){p.running=true;p.travel=0;return result(true,'水滴先去下一片低处，再让池沿生长、蓄水和溢流。');}
     return result(false,'这一步暂时不能进行。');
   }
   function tickChapter(s,id,seconds){
@@ -32,6 +32,7 @@
     if(id==='flow'&&flowConnected(p)){p.runoff=Math.min(1,p.runoff+dt/4);changed=true;}
     if(id==='dissolution'&&p.charged){p.elapsed=Math.min(8,p.elapsed+dt);changed=true;}
     if(id==='emergence'&&p.level>=65){p.exposure=Math.min(4,p.exposure+dt);changed=true;}
+    if(id==='deposition'&&p.running&&p.travel<1){p.travel=Math.min(1,p.travel+dt/.7);if(p.travel>1-1e-9)p.travel=1;return {changed:true,phaseChanged:p.travel===1};}
     if(id==='deposition'&&p.running){p.fraction=Math.min(1,p.fraction+dt/[3,3,2.5][p.sequence%3]);changed=true;if(p.fraction>=1-1e-9){p.sequence++;p.fraction=0;phaseChanged=true;if(p.sequence%3===0)p.running=false;}}
     if(solved(id,p))return {...award(s,id),changed:true,phaseChanged:true};
     return {changed,phaseChanged};
@@ -70,7 +71,7 @@
           if(c.id==='flow')p.runoff=flowConnected(p)?clamp(v.runoff,1):0;
           if(c.id==='dissolution'){p.charged=v.charged===true;p.elapsed=p.charged?clamp(v.elapsed,8):0;}
           if(c.id==='emergence')p.exposure=p.level>=65?clamp(v.exposure,4):0;
-          if(c.id==='deposition'){p.sequence=Number.isInteger(v.sequence)&&v.sequence>=0&&v.sequence<=9?v.sequence:0;p.fraction=p.sequence<9?clamp(v.fraction,1):0;p.running=p.sequence<9&&(v.running===true||p.sequence%3!==0);}
+          if(c.id==='deposition'){p.sequence=Number.isInteger(v.sequence)&&v.sequence>=0&&v.sequence<=9?v.sequence:0;p.fraction=p.sequence<9?clamp(v.fraction,1):0;p.running=p.sequence<9&&(v.running===true||p.sequence%3!==0);p.travel=p.running&&p.sequence%3===0&&p.fraction===0&&Number.isFinite(v.travel)?clamp(v.travel,1):1;}
           p.won=v.won===true&&!!p.earnedAt;
           if(c.id==='deposition'&&p.sequence===9&&!p.earnedAt){p.sequence=0;p.fraction=0;p.running=false;}
         }else if(v.won===true&&p.earnedAt){

@@ -105,9 +105,10 @@
 .water-game-progress { font-size:9px; gap:7px; line-height:1.7; color:#829477; }.water-game-progress span:first-child { flex:1; min-width:110px; }
 .water-motion-step { margin:10px 22px 0; width:calc(100% - 44px); min-height:44px; border:1px dashed #adbfa0; }
 .co2-interaction { position:absolute; inset:0; z-index:4; pointer-events:none; }
-.co2-token { position:absolute; right:23px; top:64px; display:flex; align-items:center; gap:0; justify-content:center; min-width:85px; height:49px; padding:5px; border:1px solid #c6d0b6; border-radius:25px; background:#f9f6e7ed; color:#647f73; box-shadow:0 5px 18px #34594b18; pointer-events:auto; touch-action:none; cursor:grab; font-family:Georgia,serif; font-size:14px; user-select:none; }
-.co2-token > span:nth-child(2) { position:relative; z-index:1; background:#d8ddc2; padding:9px 6px; border-radius:50%; }.molecule-atom { width:15px; height:15px; border-radius:50%; background:#c5dad0; border:1px solid #fff8; margin:0 -1px; }
-.co2-token.dragging { z-index:8; cursor:grabbing; box-shadow:0 10px 26px #244e3e33; }
+.co2-token { position:absolute; left:75%; top:35%; transform:translate(-50%,-50%); width:94px; min-width:0; height:78px; padding:0; border:0; border-radius:45%; background:transparent; color:#758d7e; pointer-events:auto; touch-action:none; cursor:grab; user-select:none; box-shadow:none; }
+.co2-token.dragging { cursor:grabbing; background:transparent; box-shadow:none; }
+.gas-caption { position:absolute; bottom:-5px; left:50%; transform:translateX(-50%); font:11px Georgia,serif; color:#718878; letter-spacing:1px; }
+.co2-fallback-cloud { display:none; width:100%; height:100%; }
 .co2-drop-target { position:absolute; left:50%; top:47%; transform:translate(-50%,-50%); width:74px; height:82px; min-height:44px; border:1px dashed #86b6a066; border-radius:48%; background:none; padding:0; pointer-events:none; transition:background .2s,border-color .2s; }
 .co2-target-label { position:absolute; width:112px; left:50%; bottom:calc(100% + 4px); transform:translateX(-50%); color:#739380; font-size:10px; font-weight:400; white-space:nowrap; pointer-events:none; }
 .co2-drop-target.receiving { background:#b9e3d177; border:1px solid #609783; }.co2-drop-target.receiving .co2-target-label { color:#3a7159; }
@@ -115,5 +116,25 @@
 [data-render-state="fallback"]:has(.co2-interaction:not([hidden])) .fallback-ponds { visibility:hidden; }
 [data-render-state="fallback"]:has(.co2-interaction:not([hidden])) .water-fallback p { margin-top:125px; }
 .co2-token:focus-visible { outline:2px solid #548d72; outline-offset:4px; }
-@container(max-width:350px) { .water-canvas { height:365px; }.co2-token { right:17px; top:54px; min-width:76px; }.water-controls { right:14px; }.flow-switches .game-choice span { margin-right:3px; }.flow-switches .game-choice strong { font-size:10px; } }
+@container(max-width:350px) { .water-canvas { height:365px; }.water-controls { right:14px; }.flow-switches .game-choice span { margin-right:3px; }.flow-switches .game-choice strong { font-size:10px; } }
 @media(prefers-reduced-motion:reduce) { .process-meter > span,.co2-drop-target { transition:none; } }
+
+/* The character is a real scene mesh; these transparent handles supply touch and keyboard access. */
+.water-drop-interaction { position:absolute; inset:0; z-index:4; pointer-events:none; }
+.water-drop-handle { position:absolute; left:30%; top:42%; transform:translate(-50%,-50%); width:62px; height:73px; min-height:44px; padding:0; border:0; border-radius:50%; background:transparent; pointer-events:auto; touch-action:none; cursor:grab; user-select:none; }
+.water-drop-handle.dragging { cursor:grabbing; }
+.drop-handle-caption { position:absolute; left:50%; top:100%; transform:translateX(-50%); font-size:9px; white-space:nowrap; color:#6d9181; pointer-events:none; }
+.water-drop-handle.dragging .drop-handle-caption { opacity:0; }
+.water-drop-next-target { position:absolute; left:66%; top:65%; transform:translate(-50%,-50%); width:76px; height:50px; border-radius:50%; border:1px dashed #86a88b50; background:#faf5d909; pointer-events:none; transition:border-color .18s,background .18s; }
+.water-drop-next-target > span { position:absolute; left:50%; top:calc(100% + 6px); transform:translateX(-50%); font-size:9px; white-space:nowrap; color:#85917a; }
+.water-drop-next-target.receiving { border-color:#9bb98b; background:#ecf1c333; }
+.water-drop-next-target.receiving > span { color:#507754; }
+.anchor-fallback-drop { display:none; width:48px; height:60px; margin:auto; }
+[data-render-state="fallback"] .co2-fallback-cloud,[data-render-state="fallback"] .anchor-fallback-drop { display:block; }
+[data-render-state="fallback"] .co2-token { left:75% !important; top:34% !important; visibility:visible !important; }
+[data-render-state="fallback"] .co2-drop-target { left:29% !important; top:43% !important; visibility:visible !important; }
+[data-render-state="fallback"] .water-drop-handle { left:28% !important; top:38% !important; visibility:visible !important; }
+[data-render-state="fallback"] .water-drop-next-target { left:67% !important; top:61% !important; visibility:visible !important; }
+[data-render-state="fallback"]:has(.water-drop-interaction:not([hidden])) .fallback-ponds { visibility:hidden; }
+[data-render-state="fallback"]:has(.water-drop-interaction:not([hidden])) .water-fallback p { margin-top:180px; }
+@media(prefers-reduced-motion:reduce) { .water-drop-next-target { transition:none; } }

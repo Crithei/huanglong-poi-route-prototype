@@ -106,12 +106,34 @@ function createDissolutionScene(){
   const plain=new THREE.Color(0x78e3e4),charged=new THREE.Color(0xa6e8d0),halo=k.group('dissolution-charge-glow',drop);
   const haloMaterial=k.material(0xe5f5c0,{roughness:.4,transparent:true,opacity:.0,depthWrite:false},true);
   const ring=k.mesh(new THREE.TorusGeometry(.49,.018,4,22),haloMaterial,[0,.07,0],halo);ring.rotation.x=Math.PI/2;
+  // CO₂ is an illustrative gas puff, separate from the recurring water character.
+  // Its model position is never read back from the renderer's temporary drag pose.
+  const cloud=k.group('dissolution-co2-cloud'),cloudHome=new THREE.Vector3(2.55,3.55,.52),cloudDestination=new THREE.Vector3(-1.5,3.86,.62),cloudPosition=cloudHome.clone();
+  const cloudMaterials=[0xe6efd8,0xc6dbc6,0xf5f1df].map(color=>k.material(color,{roughness:.94,transparent:true,opacity:.97,depthWrite:false},true));
+  const puffGeometry=new THREE.IcosahedronGeometry(1,1),puffs=[];
+  for(const [i,[x,y,z,s]] of [[-.41,-.02,0,.30],[-.13,.13,-.04,.41],[.22,.20,.0,.36],[.48,.02,.01,.27],[.08,-.09,.17,.35],[-.26,-.09,.18,.30],[.26,-.07,-.15,.26]].entries()){
+    const puff=k.mesh(puffGeometry,cloudMaterials[i%3],[x,y,z],cloud);puff.name='co2-cloud-puff-'+i;puff.rotation.set(i*.63,i*.47,i*.28);puff.scale.set(s,s*.85,s*.86);puffs.push({puff,x,y,z,s});
+  }
+  const wisps=k.group('dissolution-co2-wisps'),wispGeometry=new THREE.IcosahedronGeometry(.10,0),wispMaterial=k.material(0xe3eed2,{roughness:.85,transparent:true,opacity:0,depthWrite:false},true);
+  for(let i=0;i<9;i++){const wisp=k.mesh(wispGeometry,wispMaterial,[0,0,0],wisps);wisp.rotation.set(i*.52,i*.31,i*.17);}
   for(let i=0;i<6;i++)k.rock([-1.84+i*.13,mountain.height(-1.84+i*.13,.12)+.025,.12],.075,0x786f50).scale.set(1.3,.6,.9);
   let charge=0;const progress=[0,0,0];
   function update(time,p={},delta=1/60,snap=false){
     const elapsed=p.charged?clamp(p.elapsed,0,8):0;
     charge=approach(charge,p.charged?1:0,delta,snap,6);wet.update(time,p.charged?1:0,delta,snap);
     body.material.color.copy(plain).lerp(charged,charge);haloMaterial.opacity=charge*.65;halo.rotation.y=time*.3;
+    const gasClock=p.charged?elapsed:time,travel=p.charged?THREE.MathUtils.smoothstep(elapsed,0,.9):0;
+    const dissolve=p.charged?THREE.MathUtils.smoothstep(elapsed,.28,1):0;
+    cloudPosition.copy(cloudHome).lerp(cloudDestination,travel);
+    cloudPosition.x+=Math.sin(gasClock*.42)*.055*(1-travel);
+    cloudPosition.y+=Math.sin(gasClock*.8)*.055*(1-travel)+Math.sin(travel*Math.PI)*.26;
+    cloud.position.copy(cloudPosition);cloud.rotation.set(0,Math.sin(gasClock*.48)*.07,Math.sin(gasClock*.6)*.025);
+    cloud.scale.setScalar((1+Math.sin(gasClock*.9)*.025)*(1-THREE.MathUtils.smoothstep(elapsed,.12,1)));
+    cloud.visible=!p.charged||elapsed<1;cloudMaterials.forEach(material=>material.opacity=.97*(1-dissolve));
+    puffs.forEach(({puff,x,y,z,s},i)=>{const breath=1+Math.sin(gasClock*.85+i*.7)*.035;puff.position.set(x,y+Math.sin(gasClock*.72+i)*.012,z);puff.scale.set(s*breath,s*.85*breath,s*.86*breath);});
+    const wispAmount=p.charged?THREE.MathUtils.smoothstep(elapsed,.05,.25)*(1-THREE.MathUtils.smoothstep(elapsed,.7,1.15)):0;
+    wisps.visible=wispAmount>.01;wispMaterial.opacity=wispAmount*.72;
+    wisps.children.forEach((wisp,i)=>{const u=clamp((elapsed-.05-i*.035)/.68),bend=Math.sin(u*Math.PI);wisp.position.copy(cloudHome).lerp(cloudDestination,u);wisp.position.x+=Math.sin(i*2.3)*.19*bend;wisp.position.y+=.15+bend*(.17+Math.sin(i*1.7)*.16);wisp.position.z+=Math.cos(i*2.2)*.16*bend;wisp.scale.setScalar((.65+(i%3)*.16)*(1-u*.87));});
     sites.forEach((stone,i)=>{
       const target=clamp((elapsed-i*2.35)/2.7);progress[i]=approach(progress[i],target,delta,snap,7);
       const shrink=1-.62*progress[i];stone.scale.set(1.2*shrink,.87*shrink,.87*shrink);
@@ -121,7 +143,7 @@ function createDissolutionScene(){
     drop.position.set(-1.5,3.7+Math.sin(time*2)*.06,.62);drop.rotation.y=.16;
   }
   update(0,{},0,true);
-  return {root,markers:[],interactables:[],dropTarget:drop,update,dispose:k.dispose};
+  return {root,markers:[],interactables:[],dragSource:cloud,dropTarget:drop,update,dispose:k.dispose};
 }
 
 function createEmergenceScene(){

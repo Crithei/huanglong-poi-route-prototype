@@ -295,8 +295,12 @@
               <span class="water-scene-label" id="waterSceneLabel">微缩黄龙 / 过程示意</span>
               <span class="water-scene-state" id="waterSceneState">模型预览</span>
               <div id="co2Interaction" class="co2-interaction" hidden>
-                <button type="button" id="co2Token" class="co2-token" aria-label="CO₂，拖到水滴上，或按回车加入"><span class="molecule-atom"></span><span>CO₂</span><span class="molecule-atom"></span></button>
+                <button type="button" id="co2Token" class="co2-token" aria-label="CO₂ 气团，拖到水滴上，或按回车加入"><svg class="co2-fallback-cloud" viewBox="0 0 100 68" aria-hidden="true"><path d="M18 53C1 49 4 28 21 25C21 5 47 3 56 17C72 5 90 19 85 31C104 39 90 62 75 57H24Z" fill="#d7e6db"/><path d="M21 25L37 15L57 23L64 40L46 55L22 49Z" fill="#ecf2e4"/><path d="M57 23L73 19L86 32L75 47L64 40Z" fill="#bacec2"/></svg><span class="gas-caption">CO₂</span></button>
                 <button type="button" id="co2DropTarget" class="co2-drop-target" tabindex="-1" aria-label="把 CO₂ 放在水滴上"><span class="co2-target-label">让水带上 CO₂</span><svg class="co2-fallback-drop" viewBox="0 0 60 70" aria-hidden="true"><path d="M30 3C24 19 9 31 9 45a21 21 0 0042 0C51 31 36 19 30 3" fill="#62c9ca"/><circle cx="24" cy="44" r="2" fill="#315858"/><circle cx="36" cy="44" r="2" fill="#315858"/></svg></button>
+              </div>
+              <div id="waterDropInteraction" class="water-drop-interaction" hidden>
+                <button type="button" id="waterDropHandle" class="water-drop-handle" aria-label="拖动水滴到下一片彩池，或按回车出发"><svg class="anchor-fallback-drop" viewBox="0 0 60 70" aria-hidden="true"><path d="M30 3C24 19 9 31 9 45a21 21 0 0042 0C51 31 36 19 30 3" fill="#62c9ca"/><path d="M30 3L18 47L30 65L9 45Z" fill="#8ee1d5"/><circle cx="24" cy="44" r="2" fill="#315858"/><circle cx="36" cy="44" r="2" fill="#315858"/></svg><span class="drop-handle-caption">拖动水滴</span></button>
+                <div id="waterDropNextTarget" class="water-drop-next-target"><span>下一片彩池</span></div>
               </div>
               <div class="water-controls" aria-label="模型视角"><button type="button" data-scene-control="left" aria-label="向左旋转模型"><i data-lucide="rotate-ccw" aria-hidden="true"></i></button><button type="button" data-scene-control="right" aria-label="向右旋转模型"><i data-lucide="rotate-cw" aria-hidden="true"></i></button><button type="button" data-scene-control="zoom" aria-label="放大模型"><i data-lucide="zoom-in" aria-hidden="true"></i></button><button type="button" data-scene-control="reset" aria-label="恢复模型视角"><i data-lucide="scan" aria-hidden="true"></i></button><button type="button" data-scene-control="pause" aria-label="暂停场景动画" aria-pressed="false"><i data-lucide="pause" aria-hidden="true"></i></button></div>
             </div>

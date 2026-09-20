@@ -9,7 +9,8 @@ const root=path.join(__dirname,'..'),key='huanglong.travel-journal.v1';
 async function page(saved,{fallback=false,reducedMotion=false}={}){
   const errors=[],console=new VirtualConsole();console.on('jsdomError',e=>errors.push(e.message));
   const dom=new JSDOM(fs.readFileSync(path.join(root,'index.html'),'utf8'),{url:'https://prototype.test/?view=follow',runScripts:'outside-only',virtualConsole:console});
-  const w=dom.window,intervals=new Map();let nextTimer=1,sceneOptions,hidden=false,sceneRect={left:0,top:100,right:600,bottom:460,width:600,height:360};
+  const w=dom.window,intervals=new Map(),sceneDrag=[];let nextTimer=1,sceneOptions,hidden=false,sceneRect={left:0,top:100,right:600,bottom:460,width:600,height:360};
+  const targetRects={co2:{left:240,top:190,right:320,bottom:290,width:80,height:100},water:{left:340,top:310,right:430,bottom:400,width:90,height:90}};
   w.setInterval=callback=>{const id=nextTimer++;intervals.set(id,callback);return id;};w.clearInterval=id=>intervals.delete(id);
   w.setTimeout=()=>nextTimer++;w.clearTimeout=()=>{};
   w.matchMedia=()=>({matches:reducedMotion,addEventListener(){},removeEventListener(){}});
@@ -17,20 +18,21 @@ async function page(saved,{fallback=false,reducedMotion=false}={}){
   w.HTMLElement.prototype.scrollTo=()=>{};w.HTMLElement.prototype.scrollIntoView=()=>{};
   w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;};
   w.document.querySelector('#waterScene').getBoundingClientRect=()=>sceneRect;
-  w.document.querySelector('#co2DropTarget').getBoundingClientRect=()=>({left:240,top:190,right:320,bottom:290,width:80,height:100});
-  if(!fallback)w.HuanglongWaterScene={mount(host,options){sceneOptions=options;host.dataset.renderState='ready';return {setChapter(){},pause(){},rotate(){},zoom(){},reset(){},dispose(){}};}};
+  w.document.querySelector('#co2DropTarget').getBoundingClientRect=()=>targetRects.co2;
+  if(w.document.querySelector('#waterDropNextTarget'))w.document.querySelector('#waterDropNextTarget').getBoundingClientRect=()=>targetRects.water;
+  if(!fallback)w.HuanglongWaterScene={mount(host,options){sceneOptions=options;host.dataset.renderState='ready';return {setChapter(){},pause(){},rotate(){},zoom(){},reset(){},dispose(){},beginDrag(x,y){sceneDrag.push(['begin',x,y]);return true;},moveDrag(x,y){sceneDrag.push(['move',x,y]);},endDrag(accepted=false){sceneDrag.push(['end',accepted]);}};}};
   if(saved)w.localStorage.setItem(key,saved);
   for(const file of ['data/facilities.js','data/scenic.js','map.js','follow-state.js','follow.js','app.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),dom.getInternalVMContext(),{filename:file});
   await Promise.resolve();
   const $=selector=>w.document.querySelector(selector),click=selector=>{assert.ok($(selector),'missing '+selector);$(selector).click();};
   const slider=(selector,n)=>{assert.ok($(selector),'missing '+selector);$(selector).value=n;$(selector).dispatchEvent(new w.Event('input',{bubbles:true}));};
-  const pointer=(type,x,y,id=7)=>{const event=new w.MouseEvent(type,{bubbles:true,button:0,clientX:x,clientY:y});Object.defineProperty(event,'pointerId',{value:id});$('#co2Token').dispatchEvent(event);};
-  const drag=(x,y)=>{pointer('pointerdown',80,180);pointer('pointermove',x,y);pointer('pointerup',x,y);};
+  const pointer=(type,x,y,id=7,source='#co2Token')=>{const event=new w.MouseEvent(type,{bubbles:true,button:0,clientX:x,clientY:y});Object.defineProperty(event,'pointerId',{value:id});$(source).dispatchEvent(event);};
+  const drag=(x,y,source='#co2Token')=>{pointer('pointerdown',80,180,7,source);pointer('pointermove',x,y,7,source);pointer('pointerup',x,y,7,source);};
   const advance=(id,seconds)=>{assert.ok(sceneOptions,'animation callback was not mounted');for(let i=0;i<Math.ceil(seconds/.1);i++)sceneOptions.onTick(id,.1);};
   const advanceFallback=seconds=>{for(let i=0;i<Math.ceil(seconds/.1);i++)for(const callback of intervals.values())callback();};
   const save=()=>w.localStorage.getItem(key),state=()=>JSON.parse(save());
   const open=id=>click(`[data-water-chapter="${id}"]`),arrive=id=>{open(id);click('[data-chapter-checkin]');};
-  return {dom,w,$,click,slider,pointer,drag,advance,advanceFallback,errors,save,state,open,arrive,interact:(...args)=>sceneOptions.onInteract(...args),setHidden:value=>{hidden=value;},setSceneRect:value=>{sceneRect=value;}};
+  return {dom,w,$,click,slider,pointer,drag,advance,advanceFallback,errors,save,state,open,arrive,sceneDrag,interact:(...args)=>sceneOptions.onInteract(...args),setHidden:value=>{hidden=value;},setSceneRect:value=>{sceneRect=value;},setTargetRect:(id,value)=>{targetRects[id]=value;}};
 }
 
 test('page interactions automatically complete all chapters and preserve awards through replay and reload',async()=>{
@@ -45,7 +47,9 @@ test('page interactions automatically complete all chapters and preserve awards 
     for(let pond=0;pond<3;pond++){
       assert.equal(p.state().chapters.deposition.sequence,pond*3);
       p.click('#waterAction');assert.equal(p.$('#waterAction').disabled,true);
-      p.advance('deposition',3.1);assert.equal(p.state().chapters.deposition.sequence,pond*3+1);
+      assert.equal(p.state().chapters.deposition.travel,0);
+      p.advance('deposition',.4);assert.equal(p.state().chapters.deposition.sequence,pond*3);assert.equal(p.state().chapters.deposition.fraction,0,'the drop travels before the new rim grows');
+      p.advance('deposition',3.6);assert.equal(p.state().chapters.deposition.sequence,pond*3+1);
       p.advance('deposition',3);assert.equal(p.state().chapters.deposition.sequence,pond*3+2);
       p.advance('deposition',3);assert.equal(p.state().chapters.deposition.sequence,(pond+1)*3);
       assert.equal(p.state().chapters.deposition.running,false);
@@ -101,6 +105,74 @@ test('CO2 dragging rejects locked, missed and cancelled drops, then starts the e
 test('keyboard CO2 alternative starts dissolution without requiring a drag',async()=>{
   const p=await page();
   try{p.arrive('dissolution');p.click('#co2Token');assert.equal(p.state().chapters.dissolution.charged,true);p.advance('dissolution',8.1);assert.equal(p.state().chapters.dissolution.won,true);assert.deepEqual(p.errors,[]);}finally{p.dom.window.close();}
+});
+
+test('water drop requires arrival and a deliberate drag to the current lower target',async()=>{
+  const p=await page();
+  try{
+    p.open('deposition');assert.equal(p.$('#waterDropInteraction').hidden,true);
+    const stamps=JSON.stringify(p.state().stamps);
+    p.drag(380,350,'#waterDropHandle');p.click('#waterDropHandle');p.interact('start');p.advance('deposition',12);
+    assert.equal(p.state().chapters.deposition.running,false);assert.equal(JSON.stringify(p.state().stamps),stamps,'dragging never creates a POI arrival');
+    p.click('[data-chapter-checkin]');assert.equal(p.$('#waterDropInteraction').hidden,false);
+    p.drag(280,240,'#waterDropHandle');assert.equal(p.state().chapters.deposition.running,false,'the CO2 target is not a pool target');
+    p.pointer('pointerdown',380,350,7,'#waterDropHandle');p.pointer('pointerup',380,350,7,'#waterDropHandle');
+    assert.equal(p.state().chapters.deposition.running,false,'a tap at the destination must not count as dragging');
+    p.pointer('pointerdown',80,180,7,'#waterDropHandle');p.pointer('pointermove',380,350,7,'#waterDropHandle');p.pointer('pointercancel',380,350,7,'#waterDropHandle');p.pointer('pointerup',380,350,7,'#waterDropHandle');
+    assert.equal(p.state().chapters.deposition.running,false);assert.equal(p.$('#waterDropNextTarget').classList.contains('receiving'),false);
+    p.drag(380,350,'#waterDropHandle');assert.equal(p.state().chapters.deposition.running,true);assert.equal(p.state().chapters.deposition.travel,0);assert.equal(p.$('#waterDropInteraction').hidden,true);
+    assert.ok(p.sceneDrag.some(event=>event[0]==='end'&&event[1]===true),'accepted drop is handed to the renderer');
+    p.advance('deposition',.3);p.click('#waterDropHandle');p.interact('start');
+    assert.ok(p.state().chapters.deposition.travel>0,'duplicate start must not reset an already travelling drop');
+    p.advance('deposition',1.8);
+    assert.ok(p.state().chapters.deposition.fraction>0,'duplicate starts must not reset travel or the growth clock');assert.equal(p.state().chapters.deposition.sequence,0);
+    p.advance('deposition',10);assert.equal(p.state().chapters.deposition.sequence,3);assert.equal(p.state().chapters.deposition.running,false);assert.equal(p.$('#waterDropInteraction').hidden,false);
+    p.setTargetRect('water',{left:480,top:350,right:560,bottom:440,width:80,height:90});
+    p.drag(380,350,'#waterDropHandle');assert.equal(p.state().chapters.deposition.running,false,'the previous location cannot trigger the next pool');
+    p.drag(520,390,'#waterDropHandle');assert.equal(p.state().chapters.deposition.running,true);
+    assert.deepEqual(p.errors,[]);
+  }finally{p.dom.window.close();}
+});
+
+test('keyboard pool action runs one cycle and reloading preserves travel before growth',async()=>{
+  const p=await page();
+  try{
+    p.arrive('deposition');p.click('#waterDropHandle');assert.equal(p.state().chapters.deposition.running,true);
+    p.advance('deposition',.3);
+    p.setHidden(true);p.w.document.dispatchEvent(new p.w.Event('visibilitychange'));
+    const saved=p.state();assert.ok(saved.chapters.deposition.travel>0&&saved.chapters.deposition.travel<1);assert.equal(saved.chapters.deposition.fraction,0);
+    const q=await page(p.save());
+    try{
+      assert.equal(q.state().chapters.deposition.travel,saved.chapters.deposition.travel);assert.equal(q.$('#waterDropInteraction').hidden,true);
+      q.advance('deposition',10);assert.equal(q.state().chapters.deposition.sequence,3);assert.equal(q.state().chapters.deposition.running,false);assert.equal(q.$('#waterDropInteraction').hidden,false);
+      assert.deepEqual(q.errors,[]);
+    }finally{q.dom.window.close();}
+    assert.deepEqual(p.errors,[]);
+  }finally{p.dom.window.close();}
+});
+
+test('switching chapter, pausing, context loss or leaving page cancels unfinished drags',async()=>{
+  for(const trigger of ['switch','pause','contextlost','pagehide']){
+    const p=await page();
+    try{
+      p.arrive('dissolution');p.pointer('pointerdown',80,180);p.pointer('pointermove',280,240);
+      if(trigger==='switch')p.open('flow');
+      if(trigger==='pause')p.click('[data-scene-control="pause"]');
+      if(trigger==='contextlost')p.$('#waterScene').dispatchEvent(new p.w.Event('webglcontextlost',{bubbles:true}));
+      if(trigger==='pagehide')p.w.dispatchEvent(new p.w.Event('pagehide'));
+      p.pointer('pointerup',280,240);
+      assert.equal(p.state().chapters.dissolution.charged,false,trigger+' must not leave an active drop gesture');
+      assert.equal(p.$('#co2Token').classList.contains('dragging'),false);assert.equal(p.$('#co2DropTarget').classList.contains('receiving'),false);
+      assert.deepEqual(p.errors,[]);
+    }finally{p.dom.window.close();}
+  }
+});
+
+test('older v3 saves without travel continue their existing pool animation',async()=>{
+  const earned='2026-09-20T03:00:00Z';
+  const raw=JSON.stringify({version:3,activeChapter:'deposition',stamps:{'five-color-pond':earned},chapters:{deposition:{sequence:1,fraction:.4,running:true,won:false,earnedAt:null}}});
+  const p=await page(raw);
+  try{assert.equal(p.state().chapters.deposition.travel,1);assert.equal(p.state().chapters.deposition.sequence,1);assert.equal(p.$('#waterDropInteraction').hidden,true);p.advance('deposition',6);assert.equal(p.state().chapters.deposition.sequence,3);assert.deepEqual(p.errors,[]);}finally{p.dom.window.close();}
 });
 
 test('no-WebGL fallback advances only while visible and unpaused, without real timers',async()=>{

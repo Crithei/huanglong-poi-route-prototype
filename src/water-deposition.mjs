@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import {createLandscape,POOLS} from './water-landscape.mjs';
+import {createModelKit} from './water-model-kit.mjs';
 
 const SEGMENTS=48;
 const TAU=Math.PI*2;
@@ -26,6 +27,18 @@ export function createDepositionScene(){
   }
   const particleGeometry=new THREE.IcosahedronGeometry(.055,0);
   const crystalGeometry=new THREE.OctahedronGeometry(.13,0);
+  const protagonist=createModelKit('Waterdrop through the growing terraces');
+  root.add(protagonist.root);
+  const drop=protagonist.droplet([POOLS[2].x,POOLS[2].y+.98,POOLS[2].z],.95);
+  // Keep the animation anchor separate: the renderer temporarily moves the
+  // visible object during dragging and must never alter the return trajectory.
+  const dropAnchors=POOLS.slice(2).map(p=>new THREE.Vector3(p.x,p.y+.98,p.z));
+  const dropPosition=dropAnchors[0].clone(),dropGoal=new THREE.Vector3();
+  const dropLanding=new THREE.Object3D();dropLanding.name='Waterdrop hover landing';root.add(dropLanding);
+  const nextTarget=new THREE.Group();nextTarget.name='Next terrace landing target';root.add(nextTarget);
+  const targetMaterial=new THREE.MeshBasicMaterial({color:0xffefbe,transparent:true,opacity:.62,side:THREE.DoubleSide,depthWrite:false});
+  const targetRing=new THREE.Mesh(new THREE.RingGeometry(.36,.40,36),targetMaterial);
+  targetRing.name='Unnumbered landing ripple';targetRing.rotation.x=-Math.PI/2;nextTarget.add(targetRing);
   function outline(p,index){
     return Array.from({length:SEGMENTS},(_,i)=>{const a=i/SEGMENTS*TAU,w=1+.085*Math.sin(a*3+index)+.055*Math.cos(a*7-index);return [Math.cos(a)*p.rx*w,Math.sin(a)*p.rz*w];});
   }
@@ -128,6 +141,24 @@ export function createDepositionScene(){
     const progress=p.won?9:sequence+fraction;
     const seconds=Number.isFinite(time)?time:0;
     const speed=snap?1:1-Math.exp(-12*Math.max(0,Math.min(.1,Number.isFinite(delta)?delta:0)));
+    const complete=!!p.won||sequence===9,cycle=Math.min(2,Math.floor(sequence/3));
+    const travelling=!complete&&!!p.running&&sequence%3===0&&fraction===0;
+    const travel=Number.isFinite(p.travel)?clamp(p.travel):1;
+    if(complete)dropGoal.copy(dropAnchors[3]);
+    else if(travelling){
+      const easedTravel=travel*travel*(3-2*travel);
+      if(travel===0)dropGoal.copy(dropAnchors[cycle]);
+      else if(travel===1)dropGoal.copy(dropAnchors[cycle+1]);
+      else{dropGoal.lerpVectors(dropAnchors[cycle],dropAnchors[cycle+1],easedTravel);dropGoal.y+=Math.sin(travel*Math.PI)*.42;}
+    }else dropGoal.copy(dropAnchors[sequence%3!==0||fraction>0?cycle+1:cycle]);
+    if(snap)dropPosition.copy(dropGoal);else dropPosition.lerp(dropGoal,speed);
+    drop.position.copy(dropPosition);drop.position.y+=Math.sin(seconds*2.1)*.055;
+    drop.rotation.y=.38+Math.sin(seconds*.65)*.1;drop.visible=true;
+    dropLanding.position.copy(dropAnchors[complete?3:cycle+1]);dropLanding.position.y+=Math.sin(seconds*2.1)*.055;
+    const nextPool=POOLS[cycle+3];
+    nextTarget.position.set(nextPool.x,.015+(5.3-nextPool.z)*.19,nextPool.z);
+    nextTarget.visible=!complete&&!p.running&&sequence%3===0&&fraction===0;
+    targetRing.scale.setScalar(.95+.09*Math.sin(seconds*2));targetMaterial.opacity=.54+.12*Math.sin(seconds*2);
     for(let i=0;i<3;i++){
       const pond=ponds[i],start=i*3;
       const targetRim=clamp(progress-start),targetFill=clamp(progress-start-1),targetSpill=clamp(progress-start-2);
@@ -180,7 +211,7 @@ export function createDepositionScene(){
     }
   }
   update(0,{},0,true);
-  return {root,markers:[],update,dispose(){
+  return {root,markers:[],drop,dragSource:drop,dropTarget:nextTarget,dropLanding,update,dispose(){
     if(disposed)return;disposed=true;
     const geometries=new Set(),allMaterials=new Set();
     root.traverse(object=>{if(object.geometry)geometries.add(object.geometry);if(object.material)for(const entry of Array.isArray(object.material)?object.material:[object.material])allMaterials.add(entry);});

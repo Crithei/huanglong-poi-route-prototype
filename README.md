@@ -10,7 +10,7 @@
 
 2026-09-20 导览更新：14 处景点均增加“看哪里 / 怎么取舍 / 来前知道”。先展示看点与游览建议，景观故事按需展开；卡片时间明确为参考停留，不含到达、换观景位置与返程。五彩池区分附近定位与实际观景视角，黄龙洞说明开放未确认。详见[本轮内容设计与验证](docs/POI-VISITOR-GUIDE.md)。
 
-2026-09-20 随行连续过程版：四个独立 Three.js 场景随 POI 手动到达解锁。转动水槽打通持续水流、拖动 CO₂ 自动观察岩石溶解、拖水位让山体泉水出露、逐池观看池沿生长—蓄水—溢流；去掉模型数字标识，加入过渡和粒子，保留四章印记与存档迁移。[直接进入随行](https://huanglong.phrynx.chat/?view=follow&v=fluid-story-20260920)。代码在 `feature/fluid-water-story`，回退标签 `archive/2026-09-20-before-fluid-scenes` 保留本轮前四章版。见[玩法、模型与回退说明](docs/WATER-DROP-GUIDE.md)及[本轮实施记录](docs/FLUID-STORY-PLAN.md)。
+2026-09-20 随行连续过程版：四个独立 Three.js 场景随 POI 手动到达解锁。转动水槽打通持续水流、拖动建模 CO₂ 气团观察岩石溶解、拖水位让山体泉水出露、拖动同一滴水去下一处（或点按钮带它出发），逐池观看池沿生长—蓄水—溢流；去掉模型数字标识，加入过渡和粒子，保留四章印记与存档迁移。[直接进入随行](https://huanglong.phrynx.chat/?view=follow&v=water-anchor-20260920)。代码在 `feature/fluid-water-story`，回退标签 `archive/2026-09-20-before-water-anchor` 保留本轮前的连续过程版。见[玩法、模型与回退说明](docs/WATER-DROP-GUIDE.md)及[本轮实施记录](docs/FLUID-STORY-PLAN.md)。
 
 ## 打开原型
 
