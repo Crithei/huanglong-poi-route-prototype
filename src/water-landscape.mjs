@@ -58,7 +58,7 @@ export function createLandscape(){
         const divider=mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(path),18,.047,4,false),mat(0xe6dbaf));divider.name='Small natural pool partitions';
       }
     }
-    if(index>2){const fresh=polygonRing(points,[0,.06,.15],[1.008,1.007,.973],0xf3e5b7,growth);fresh.position.set(p.x,p.y+.08,p.z);fresh.userData.rim=true;fresh.name='Accumulating rim '+index;}
+    if(index>2){const fresh=polygonRing(points,[0,.06,.15],[1.008,1.007,.973],0xf3e5b7,growth);fresh.position.set(p.x,p.y+.08,p.z);fresh.userData.rim=true;fresh.userData.patch=index-3;fresh.name='Accumulating rim '+index;}
     const positions=[],colors=[];const base=new THREE.Color(p.color);
     for(let i=0;i<points.length;i++){
       const n=(i+1)%points.length;const shade=base.clone().lerp(new THREE.Color(0x90e6d1),random()*.2);
@@ -72,7 +72,7 @@ export function createLandscape(){
     }
     if(index>2)for(let i=0;i<12;i++){
       const t=i/12*Math.PI*.95+.05;
-      const crystal=mesh(new THREE.OctahedronGeometry(.095+random()*.075,0),mat(0xffefbb),growth);crystal.position.set(p.x+Math.cos(t)*p.rx,p.y+.09,p.z+Math.sin(t)*p.rz);crystal.rotation.z=random();crystal.userData.fullScale=.5+random()*.7;
+      const crystal=mesh(new THREE.OctahedronGeometry(.095+random()*.075,0),mat(0xffefbb),growth);crystal.position.set(p.x+Math.cos(t)*p.rx,p.y+.09,p.z+Math.sin(t)*p.rz);crystal.rotation.z=random();crystal.userData.fullScale=.5+random()*.7;crystal.userData.patch=index-3;
     }
   });
   // Thin sheets of water link consecutive pools; no expensive fluid simulation.
@@ -136,11 +136,11 @@ export function createLandscape(){
   const curve=new THREE.CatmullRomCurve3(streamPoints,false,'centripetal');
   const bubbles=new THREE.Group();bubbles.name='CO2 release illustration';root.add(bubbles);
   for(let i=0;i<7;i++)mesh(new THREE.IcosahedronGeometry(.04+(i%3)*.017,0),new THREE.MeshBasicMaterial({color:0xf6ffed,transparent:true,opacity:.75}),bubbles);
-  function update(time=0,stage=0,grow=0){
+  function update(time=0,stage=0,grow=0,layers=null){
     const t=stage===0?.12:stage===1?.39:stage===2?.68:.84;
     const p=curve.getPoint(t);drop.position.copy(p);drop.position.y+=.55+Math.sin(time*1.8)*.065;drop.rotation.y=.3+Math.sin(time*.5)*.15;
     flow.children.forEach((m,i)=>{m.position.copy(curve.getPoint((time*.04+i/12)%1));});
-    growth.children.forEach(m=>{if(m.userData.rim)m.scale.set(1,Math.max(.001,grow),1);else m.scale.setScalar(Math.max(.001,grow)*m.userData.fullScale);m.visible=grow>.005;});
+    growth.children.forEach(m=>{const amount=layers?layers[m.userData.patch]:grow;if(m.userData.rim)m.scale.set(1,Math.max(.001,amount),1);else m.scale.setScalar(Math.max(.001,amount)*m.userData.fullScale);m.visible=amount>.005;});
     bubbles.visible=stage===1;
     bubbles.children.forEach((b,i)=>{const h=(time*.5+i*.14)%1;b.position.set(p.x+Math.sin(i*2)*.22,p.y+.1+h*1.1,p.z+Math.cos(i)*.18);b.scale.setScalar(.4+h*.8);});
   }

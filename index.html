@@ -287,19 +287,23 @@
             <div class="journey-caption"><span id="followMeterCopy"></span><span>手动确认进度</span></div>
           </section>
           <section class="water-experience" aria-labelledby="waterTitle">
-            <div class="water-heading"><div><p class="journal-eyebrow">A DROP THROUGH TIME</p><h2 id="waterTitle">一滴水的黄龙旅行</h2></div><span class="water-duration">约 1 分钟</span></div>
-            <p class="water-lead">跟着一滴水，看时间怎样留下彩池。</p>
+            <div class="water-heading"><div><p class="journal-eyebrow">FOUR PLACES / ONE DROP</p><h2 id="waterTitle">跟着水，读懂黄龙</h2></div><span class="water-duration" id="waterJourneyCount">0 / 4 章</span></div>
+            <p class="water-lead">每到一处风景，打开一段水的旅程。</p>
+            <div id="waterChapterGrid" class="water-chapter-grid" aria-label="选择水滴章节"></div>
             <div class="water-canvas" id="waterScene" data-render-state="loading">
-              <div class="water-fallback"><div class="fallback-ponds"><span></span><span></span><span></span><span></span></div><p>彩池形成示意</p><small>3D 场景暂不可用，可继续体验下方故事。</small></div>
-              <span class="water-scene-label">微缩黄龙 / 过程示意</span>
-              <div class="water-time-control" id="waterTimeControl" hidden><label for="waterTime">轻推时间，看池沿生长 <output id="waterTimeValue">0%</output></label><input id="waterTime" type="range" min="0" max="100" value="0" aria-describedby="waterTimeHint"/><span id="waterTimeHint">一次水流 → 许多轮水流 · 非真实年限比例</span></div>
+              <div class="water-fallback"><div class="fallback-ponds"><span></span><span></span><span></span><span></span></div><p id="waterFallbackTitle">水滴过程示意</p><small id="waterFallbackCopy">3D 暂不可用，仍可通过下方控件完成互动。</small></div>
+              <span class="water-scene-label" id="waterSceneLabel">微缩黄龙 / 过程示意</span>
+              <span class="water-scene-state" id="waterSceneState">模型预览</span>
               <div class="water-controls" aria-label="模型视角"><button type="button" data-scene-control="left" aria-label="向左旋转模型"><i data-lucide="rotate-ccw" aria-hidden="true"></i></button><button type="button" data-scene-control="right" aria-label="向右旋转模型"><i data-lucide="rotate-cw" aria-hidden="true"></i></button><button type="button" data-scene-control="zoom" aria-label="放大模型"><i data-lucide="zoom-in" aria-hidden="true"></i></button><button type="button" data-scene-control="reset" aria-label="恢复模型视角"><i data-lucide="scan" aria-hidden="true"></i></button><button type="button" data-scene-control="pause" aria-label="暂停场景动画" aria-pressed="false"><i data-lucide="pause" aria-hidden="true"></i></button></div>
             </div>
-            <p class="water-gesture">左右轻拖转动山水 · 上下滑动继续阅读</p>
-            <ol class="water-chapters" aria-label="水滴旅程"><li id="waterChapter0">01 <span>水流</span></li><li id="waterChapter1">02 <span>沉积</span></li><li id="waterChapter2">03 <span>时间</span></li></ol>
+            <p class="water-gesture">左右轻拖旋转 · 点击编号互动 · 下方按钮也可操作</p>
+            <div class="water-unlock" id="waterUnlock"></div>
             <div class="water-story" aria-live="polite"><span id="waterStageLabel" class="water-stage-label"></span><h3 id="waterStageTitle"></h3><p id="waterStageCopy"></p></div>
+            <fieldset class="water-game-controls" id="waterGameControls"><legend class="sr-only">本章互动</legend></fieldset>
+            <div class="water-game-progress"><span id="waterGameProgress"></span><span id="waterGameReward"></span></div>
+            <p class="water-feedback" id="waterGameFeedback" role="status"></p>
             <button type="button" id="waterAction" class="journal-primary water-action"></button>
-            <p class="water-science">几秒动画，代表长期积累。水携带的溶解物质在条件合适时沉积；水滴本身不会变成石头。场景为艺术化示意。</p>
+            <p class="water-science" id="waterScience"></p>
           </section>
           <section class="field-guide" aria-labelledby="fieldGuideTitle">
             <div class="journal-section-title"><div><p class="journal-eyebrow">A LITTLE DISCOVERY</p><h2 id="fieldGuideTitle">本站的小发现</h2></div><i data-lucide="sparkles" aria-hidden="true"></i></div>

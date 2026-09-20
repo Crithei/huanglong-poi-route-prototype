@@ -9,6 +9,7 @@ const files = [
   'assets/huanglong-welcome-ponds.jpg',
   'follow.js', 'follow-state.js', 'follow.css', 'assets/water-scene.js',
   'assets/THREE-LICENSE', 'assets/models/huanglong-water-landscape.glb',
+  'assets/models/huanglong-flow.glb', 'assets/models/huanglong-dissolution.glb', 'assets/models/huanglong-emergence.glb',
 ];
 
 // Only this explicit public-file list is deployed. No recursive project upload.

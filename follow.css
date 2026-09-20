@@ -49,3 +49,44 @@
 .journal-card-preview { margin-top:20px; }.journal-card-preview p { font-size:11px; color:#6f855d; }.journal-card-preview img { display:block; width:100%; height:auto; border-radius:12px; border:1px solid #d7dfc5; }.journal-card-preview a { display:flex; min-height:44px; align-items:center; justify-content:center; margin-top:10px; color:#3c765b; font-size:12px; border:1px solid #bbcaaa; border-radius:10px; }
 @container(max-width:350px) { .journal-heading { padding:21px 16px 16px; }.journal-heading h1 { font-size:21px; }.journal-eyebrow { font-size:7px; letter-spacing:1px; }.water-heading { padding:0 18px; }.water-heading h2 { font-size:25px; }.water-duration { font-size:8px; padding:4px 6px; }.water-canvas { height:308px; }.water-story { padding:20px; }.journey-current h2 { font-size:18px; }.journal-primary,.journal-secondary { font-size:11px; padding:0 10px; } }
 @media(prefers-reduced-motion:reduce) { .journey-track > div { transition:none; } }
+
+/* A pocket field atlas: four places, four miniature experiments. */
+.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+.water-chapter-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; margin:19px 18px 5px; }
+.chapter-card { min-width:0; text-align:left; padding:12px 13px 10px; border:1px solid #c8d4bd; border-radius:13px; background:#f7f8ed8c; color:#496754; position:relative; }
+.chapter-card.active { border-color:#496e56; background:#f8f9ed; box-shadow:inset 0 0 0 1px #496e56; }
+.chapter-card-top { display:flex; align-items:center; justify-content:space-between; font-size:9px; color:#75836c; letter-spacing:1px; }.chapter-card-top svg { width:15px; height:15px; }
+.chapter-card strong { display:block; margin:8px 0 6px; font-family:var(--display); font-size:19px; font-weight:500; line-height:1.3; }
+.chapter-card small { display:block; font-size:9px; line-height:1.5; min-height:27px; color:#7a8570; }
+.chapter-card-state { display:block; margin-top:8px; font-size:9px; color:#597b59; }.chapter-card.earned .chapter-card-state { color:#947340; }
+.chapter-card.earned .chapter-card-top svg { color:#a88942; }
+.water-canvas { height:365px; margin-top:8px; isolation:isolate; }
+.water-canvas[data-chapter="dissolution"] { background:radial-gradient(ellipse at 50% 60%,#d6cdb4,transparent 70%); }
+.water-canvas[data-chapter="emergence"] { background:radial-gradient(ellipse at 50% 60%,#c9e2db,transparent 70%); }
+.water-model-pins { position:absolute; inset:0; pointer-events:none; z-index:2; }
+.water-pin-lines { position:absolute; inset:0; width:100%; height:100%; overflow:visible; pointer-events:none; }.water-pin-lines line { stroke:#f6f4d9; stroke-width:1.5; stroke-dasharray:3 3; }
+.water-model-pin { position:absolute; transform:translate(-50%,-50%); pointer-events:auto; min-width:44px; min-height:44px; display:grid; place-items:center; border:1px solid #f8f4d3; border-radius:50%; background:#315e4cdf; color:#fff9d9; font-family:Georgia,serif; font-size:17px; box-shadow:0 3px 12px #173d3528; }
+.water-model-pin:disabled { pointer-events:none; opacity:.6; }.water-model-pin:hover { background:#b1944f; }
+.water-model-pin[hidden] { display:none; }.water-controls { z-index:3; }.water-scene-label { z-index:3; font-size:9px; letter-spacing:.6px; }
+.water-scene-state { position:absolute; left:23px; top:35px; z-index:3; font-size:9px; padding:4px 8px; border:1px solid #99af9760; border-radius:20px; background:#f7f7e9bb; color:#64785c; }
+.water-gesture { margin-bottom:15px; }
+.water-unlock { margin:0 20px 5px; padding:15px; border:1px dashed #b2bea4; border-radius:12px; background:#fcfbefb3; }
+.unlock-title { display:flex; gap:7px; align-items:center; }.unlock-title svg { width:16px; height:16px; }.unlock-title strong { font-size:12px; }
+.water-unlock p { font-size:10px; line-height:1.8; margin:7px 0 10px; color:#7b856e; }.water-unlock label { font-size:10px; color:#6c7e62; display:block; margin:0 0 5px; }
+.water-unlock select { display:block; width:100%; min-height:44px; background:#fffef6; color:#3e644d; border:1px solid #c5d0b7; border-radius:8px; padding:0 9px; font-family:inherit; font-size:12px; }
+.water-unlock > div:last-child { display:flex; gap:6px; margin-top:10px; }.water-unlock .journal-primary { flex:1; font-size:11px; }.water-unlock .journal-secondary { font-size:10px; padding:0 8px; }
+.water-story { min-height:0; padding-bottom:17px; }.water-story h3 { font-size:23px; line-height:1.5; }.water-stage-label { line-height:1.7; }
+.water-game-controls { min-width:0; border:1px solid #d5decb; border-radius:13px; margin:0 20px; padding:13px 12px 8px; background:#fffef778; color:#3d644e; }
+.water-game-controls legend { padding:0 6px; font-size:11px; font-weight:600; }.water-game-controls p { font-size:10px; line-height:1.8; color:#7c876f; margin:10px 1px 2px; }
+.water-game-controls:disabled { opacity:.5; }
+.game-three { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }.game-choice { min-height:47px; border-radius:8px; border:1px solid #cad4bd; padding:8px 4px; background:#f5f5e9; color:#6f8164; font-size:11px; }
+.game-choice span { display:block; font-size:9px; margin-bottom:5px; }.game-choice strong { font-weight:500; display:block; font-size:12px; white-space:nowrap; }.game-choice.selected { background:#e1e8cb; color:#3e633d; border-color:#a0b48a; }
+.water-game-controls > .game-choice { width:100%; margin-bottom:9px; }.game-choice:disabled { cursor:default; }
+.game-range-label { display:flex; align-items:center; justify-content:space-between; margin-top:15px; font-size:11px; }.game-range-label output { font-variant-numeric:tabular-nums; color:#798a5f; }
+.water-game-controls input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:#658458; touch-action:pan-y; }
+.water-game-progress { display:flex; flex-wrap:wrap; gap:6px 10px; justify-content:space-between; margin:12px 23px 0; font-size:9px; color:#71845e; }
+.water-feedback { margin:12px 23px 14px; min-height:34px; font-size:11px; line-height:1.8; color:#637c59; }
+.chapter-reward-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin:14px 0; }.chapter-reward { text-align:center; border:1px dashed #c8d0b8; padding:12px 4px; border-radius:12px; opacity:.52; background:#f2f2e6; }.chapter-reward.earned { opacity:1; background:#e9edcf; border-style:solid; border-color:#b7bd89; }.chapter-reward svg { width:24px; height:24px; margin:0 auto 7px; }.chapter-reward strong,.chapter-reward small { display:block; }.chapter-reward strong { font-size:11px; }.chapter-reward small { font-size:9px; margin-top:5px; color:#7c8e64; }.chapter-grand-badge { margin-top:10px; background:#e9e3bb; }
+.water-fallback small { max-width:260px; padding:8px 15px; line-height:1.8; }.water-canvas[data-chapter="dissolution"] .fallback-ponds span { border-radius:3px; background:#b5c7b0; transform:rotate(0); }.water-canvas[data-chapter="emergence"] .fallback-ponds span { border-radius:4px 60% 4px 30%; }.water-canvas[data-chapter="flow"] .fallback-ponds span { border-radius:30%; height:25px; }
+.water-experience button:focus-visible,.water-experience select:focus-visible,.water-experience input:focus-visible { outline:2px solid #b1893d; outline-offset:3px; }
+@container(max-width:350px) { .water-chapter-grid { margin-inline:14px; gap:7px; }.chapter-card { padding:10px; }.chapter-card strong { font-size:17px; }.water-canvas { height:330px; }.water-scene-label,.water-scene-state { left:17px; }.water-unlock { margin-inline:15px; padding:12px; }.water-game-controls { margin-inline:15px; padding-inline:8px; }.game-choice strong { font-size:11px; }.water-story h3 { font-size:21px; }.water-heading h2 { font-size:24px; } }
