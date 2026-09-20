@@ -318,21 +318,28 @@
           <h2 id="poiDialogTitle"></h2>
           <p class="poi-dialog-summary" id="poiDialogSummary"></p>
           <div class="poi-dialog-facts" id="poiDialogFacts"></div>
-          <section class="poi-dialog-section scenic-story" id="poiStorySection" hidden>
-            <h3>走近这处风景</h3><div id="poiDialogStory"></div>
-          </section>
+          <p class="poi-time-note" id="poiTimeNote" hidden>停留时间为参考，不含到达、换观景位置与返程。</p>
           <section class="poi-dialog-section">
             <h3 id="poiHighlightsHeading">为什么值得停留</h3>
             <ul id="poiDialogHighlights"></ul>
           </section>
+          <section class="poi-visit-guide" id="poiVisitSection" hidden aria-labelledby="poiVisitHeading">
+            <h3 id="poiVisitHeading">这一站怎么逛</h3>
+            <dl id="poiDialogVisitGuide"></dl>
+          </section>
+          <details class="poi-story-details scenic-story" id="poiStorySection" hidden>
+            <summary>再了解一点<span>景观与故事</span></summary>
+            <div id="poiDialogStory"></div>
+          </details>
           <section class="poi-dialog-section">
-            <h3 id="poiTipHeading">这次怎么安排</h3>
+            <h3 id="poiTipHeading">游览提醒</h3>
             <p id="poiDialogTip"></p>
           </section>
           <section class="poi-dialog-section" id="poiPhotoSection" hidden>
             <h3>试试这样看与拍</h3><p id="poiDialogPhotoTip"></p>
           </section>
           <details class="poi-sources" id="poiSourcesSection" hidden><summary>资料来源与图片说明</summary><div id="poiDialogSources"></div></details>
+          <p class="poi-coordinate-note" id="poiCoordinateNote" hidden></p>
           <div class="poi-dialog-actions">
             <button class="quiet-command" id="focusPoiOnMap" type="button">
               <i data-lucide="locate-fixed" aria-hidden="true"></i>

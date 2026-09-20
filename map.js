@@ -349,21 +349,28 @@ function renderPoiDialog(id) {
   cover.classList.remove('image-error');
   cover.style.setProperty('--poi-tint',poi.tint);
   cover.innerHTML=service?'':scenicVisual(poi,true);
-  document.querySelector('#poiStorySection').hidden=service;
+  const story=document.querySelector('#poiStorySection');
+  story.hidden=service;
+  document.querySelector('#poiTimeNote').hidden=service;
+  document.querySelector('#poiVisitSection').hidden=service||!poi.visitGuide;
+  document.querySelector('#poiDialogVisitGuide').innerHTML=service?'':[['viewing','看哪里','scan-eye'],['tradeoff','怎么取舍','route'],['expectation','来前知道','sun']].map(([key,label,icon])=>poi.visitGuide?.[key]?`<div class="poi-guide-row"><dt><i data-lucide="${icon}" aria-hidden="true"></i>${label}</dt><dd>${html(poi.visitGuide[key])}</dd></div>`:'').join('');
   document.querySelector('#poiDialogStory').innerHTML=service?'':(poi.story||[]).map(p=>`<p>${html(p)}</p>`).join('');
   document.querySelector('#poiPhotoSection').hidden=service;
   document.querySelector('#poiDialogPhotoTip').textContent=poi.photoTip||'';
   const sources=document.querySelector('#poiSourcesSection');
-  sources.hidden=service;sources.open=false;
-  document.querySelector('#poiDialogSources').innerHTML=service?'':`<p>资料核对：${html(poi.checkedAt)}。景观介绍为资料整理，停留时间与拍照方法为编辑建议。</p><ul>${(poi.sources||[]).map(s=>`<li><a href="${html(s.url)}" target="_blank" rel="noopener noreferrer">${html(s.title)}</a><span>${html(s.note||'')}</span></li>`).join('')}</ul>${poi.image?`<p>图片：<a href="${html(poi.image.sourceUrl)}" target="_blank" rel="noopener noreferrer">${html(poi.image.credit)}</a>。资料图不代表当天水量、花期或开放状态。</p>`:'<p>配图为抽象景观示意，不是景点实拍。</p>'}`;
+  sources.hidden=service;
+  document.querySelector('#poiDialogSources').innerHTML=service?'':`<p>景点资料核对：${html(poi.checkedAt)}${poi.editorialUpdatedAt?` · 导览文案更新：${html(poi.editorialUpdatedAt)}`:''}。</p><p>景观背景依据下列资料整理；观看方法、取舍、停留时间与拍照建议为编辑建议，不代表实时路况或开放状态。</p><ul>${(poi.sources||[]).map(s=>`<li><a href="${html(s.url)}" target="_blank" rel="noopener noreferrer">${html(s.title)}</a><span>${html(s.note||'')}</span></li>`).join('')}</ul>${poi.image?`<p>图片：<a href="${html(poi.image.sourceUrl)}" target="_blank" rel="noopener noreferrer">${html(poi.image.credit)}</a>。资料图不代表当天水量、花期或开放状态。</p>`:'<p>配图为抽象景观示意，不是景点实拍。</p>'}`;
   document.querySelector('#poiDialogFacts').innerHTML=service?
     `<span><i data-lucide="map-pin" aria-hidden="true"></i>${html(poi.address||'黄龙景区')}</span><span><i data-lucide="clock-3" aria-hidden="true"></i>${poi.openingHours?`资料开放时间 ${html(poi.openingHours)}`:'开放时间未提供'}</span>${poi.phone?`<a href="tel:${html(poi.phone.split(';')[0])}"><i data-lucide="phone" aria-hidden="true"></i>${html(poi.phone.split(';')[0])}</a>`:''}`:
-    `<span><i data-lucide="clock-3" aria-hidden="true"></i>建议停留 ${poi.minutes} 分钟</span><span><i data-lucide="footprints" aria-hidden="true"></i>${effortLabel(poi.effort)}</span><span><i data-lucide="map-pin" aria-hidden="true"></i>${html(poi.coordinateNote)}</span>`;
+    `<span><i data-lucide="clock-3" aria-hidden="true"></i>停留约 ${poi.minutes} 分钟</span><span><i data-lucide="map-pin" aria-hidden="true"></i>${html(poi.area)}</span>`;
+  const coordinateNote=document.querySelector('#poiCoordinateNote');
+  coordinateNote.hidden=service;
+  coordinateNote.textContent=service?'':`地图定位说明：${poi.coordinateNote}${poi.coordinateAccuracy==='nearby-reference'?'。用于寻找所在区域，非精确观景机位。':'。具体观景位置按现场指引寻找。'}`;
   document.querySelector('#poiHighlightsHeading').textContent=service?'到这里之前':'为什么值得停留';
   document.querySelector('#poiDialogHighlights').innerHTML=service?
     `<li>可在地图上查看位置，并手动选择起点查询步行路线。</li><li>${poi.entranceLocation?'高德收录了入口坐标，可单独查看入口位置。':'高德未提供独立入口坐标，当前标记为设施位置。'}</li><li>${html(poi.verificationNote||'营业、排队与可用情况以现场为准。')}</li>`:
     poi.highlights.map(item=>`<li>${html(item)}</li>`).join('');
-  document.querySelector('#poiTipHeading').textContent=service?'地点资料':'这次怎么安排';
+  document.querySelector('#poiTipHeading').textContent=service?'地点资料':'游览提醒';
   document.querySelector('#poiDialogTip').textContent=service?
     `${poi.source?'高德地图':'景区设施目录'}${poi.queriedAt?' · 查询于 '+poi.queriedAt.slice(0,10):''}。${poi.tip}`:poi.tip;
   document.querySelector('#poiDialogFacts').insertAdjacentHTML('beforeend',`${poi.entranceLocation?'<button type="button" id="focusPoiEntrance"><i data-lucide="door-open" aria-hidden="true"></i>查看入口位置</button>':''}${service?`<button type="button" data-set-origin="${html(poi.id)}"><i data-lucide="flag" aria-hidden="true"></i>设为步行起点</button>`:''}`);
@@ -375,6 +382,8 @@ function renderPoiDialog(id) {
 }
 function openPoiDetail(id) {
   if(!getPoi(id))return;
+  document.querySelector('#poiStorySection').open=false;
+  document.querySelector('#poiSourcesSection').open=false;
   appState.activePoiId=id;renderPoiDialog(id);
   const dialog=document.querySelector('#poiDialog');if(!dialog.open)dialog.showModal();dialog.scrollTop=0;
 }

@@ -372,7 +372,7 @@ function renderDiscover() {
           ${scenicVisual(poi)}
           <span class="poi-card-shade" aria-hidden="true"></span>
           <span class="poi-area">${html(poi.area)}</span>
-          <span class="poi-card-copy"><span class="poi-title">${html(poi.name)}</span><span class="poi-tagline">${html(poi.tagline)}</span><span class="poi-card-bottom">约 ${poi.minutes} 分钟 <i data-lucide="arrow-up-right" aria-hidden="true"></i></span></span>
+          <span class="poi-card-copy"><span class="poi-title">${html(poi.name)}</span><span class="poi-tagline">${html(poi.tagline)}</span><span class="poi-card-bottom">停留约 ${poi.minutes} 分钟 <i data-lucide="arrow-up-right" aria-hidden="true"></i></span></span>
         </button>
         <button class="poi-select ${isSelected ? "selected" : ""}" type="button" data-poi-id="${poi.id}" aria-label="${isSelected?'移出':'加入'}${html(poi.name)}${isSelected?'行程':'到行程'}" aria-pressed="${isSelected}"><i data-lucide="${isSelected?'check':'plus'}" aria-hidden="true"></i></button>
       </article>`;
