@@ -8,6 +8,7 @@ const port = Number.isInteger(requestedPort) && requestedPort > 0 && requestedPo
 const root = __dirname;
 
 const mimeTypes = {
+  ".glb": "model/gltf-binary",
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",
   ".ico": "image/x-icon",

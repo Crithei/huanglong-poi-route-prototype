@@ -128,6 +128,8 @@ function ensureAmap() {
   mapRuntime.initPromise=window.AMapLoader.load({key:config.amapJsapiKey,version:'2.0',plugins:['AMap.Scale','AMap.Walking']}).then(AMap=>{
     AMap.getConfig().appname = 'amap-jsapi-skill';
     mapRuntime.AMap=AMap;
+    // Loading may finish after the visitor has switched to the travel journal.
+    if(appState.activeView!=='map'||!document.querySelector('#amapMap').clientHeight){mapRuntime.initPromise=null;return null;}
     mapRuntime.map=new AMap.Map('amapMap',{viewMode:'3D',zoom:14,zooms:[11,19],center:[103.831,32.74],pitch:0,rotation:0,mapStyle:'amap://styles/fresh',dragEnable:true,zoomEnable:true,scrollWheel:true,touchZoom:true,resizeEnable:true});
     mapRuntime.map.addControl(new AMap.Scale({position:'LB',offset:new AMap.Pixel(12,10)}));
     mapRuntime.map.on('complete',()=>{

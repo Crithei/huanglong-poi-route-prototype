@@ -12,12 +12,16 @@
     <meta name="theme-color" content="#f4f8f4" />
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="mobile.css" />
+    <link rel="stylesheet" href="follow.css" />
     <script src="runtime-config.js"></script>
     <script defer src="https://webapi.amap.com/loader.js"></script>
     <script defer src="assets/lucide-0.468.0.min.js"></script>
     <script defer src="data/facilities.js"></script>
     <script defer src="data/scenic.js"></script>
     <script defer src="map.js"></script>
+    <script defer src="follow-state.js"></script>
+    <script defer src="assets/water-scene.js"></script>
+    <script defer src="follow.js"></script>
     <script defer src="app.js"></script>
   </head>
   <body data-active-view="map">
@@ -271,40 +275,43 @@
         </section>
 
         <section class="view" id="follow-view" data-view-panel="follow" aria-labelledby="follow-title" hidden>
-          <div class="follow-topline">
-            <span class="live-indicator"><span></span>随行模式</span>
-            <button class="icon-command" type="button" data-action="go-route" title="返回游线" aria-label="返回游线">
-              <i data-lucide="map" aria-hidden="true"></i>
-            </button>
-          </div>
-          <div class="follow-stage">
-            <p class="eyebrow">NEXT / HUANGLONG</p>
-            <p class="follow-kicker" id="followProgressText">准备开始</p>
-            <h1 id="followTitle">还没有可跟随的游线。</h1>
-            <p class="follow-description" id="followDescription">返回游线页选择 POI 后开始。</p>
-            <div class="follow-meter" aria-label="路线完成进度"><span id="followMeter"></span></div>
-            <p class="meter-copy" id="followMeterCopy">0 / 0 已完成</p>
-          </div>
-          <div class="follow-route-strip" id="followRouteStrip" aria-label="剩余路线"></div>
-          <div class="follow-actions">
-            <button class="quiet-command" id="shortenRoute" type="button" disabled>
-              <i data-lucide="timer-off" aria-hidden="true"></i>
-              时间不足
-            </button>
-            <button class="primary-command" id="completeStop" type="button" disabled>
-              <i data-lucide="check" aria-hidden="true"></i>
-              已到达
-            </button>
-          </div>
-          <section class="state-panel" aria-label="原型状态">
-            <button class="state-toggle" id="stateToggle" type="button" aria-expanded="false">
-              <span><i data-lucide="braces" aria-hidden="true"></i>查看原型状态</span>
-              <i data-lucide="chevron-down" aria-hidden="true"></i>
-            </button>
-            <pre id="stateOutput" hidden></pre>
+          <header class="journal-heading">
+            <div><p class="journal-eyebrow">FIELD NOTES / 黄龙旅行册</p><h1 id="follow-title">山水之间，慢慢发现。</h1></div>
+            <button class="journal-book" id="openStampBook" type="button" aria-label="打开我的印章册"><i data-lucide="notebook-pen" aria-hidden="true"></i><span id="stampCount">0 枚印章</span></button>
+          </header>
+          <section class="journey-now" aria-label="当前游览进度">
+            <div class="journey-status"><span id="followProgressText">准备开始</span><button type="button" data-action="go-route">调整游线 <i data-lucide="arrow-up-right" aria-hidden="true"></i></button></div>
+            <div class="journey-current"><span class="journey-pin"><i data-lucide="map-pin" aria-hidden="true"></i></span><div><h2 id="followTitle">下一站</h2><p id="followDescription"></p></div></div>
+            <div class="journey-buttons"><button type="button" id="completeStop" class="journal-primary">我已到达 · 收下印章</button><button type="button" id="followDetail" class="journal-secondary">本站介绍</button></div>
+            <div class="journey-track"><div id="followMeter"></div></div>
+            <div class="journey-caption"><span id="followMeterCopy"></span><span>手动确认进度</span></div>
           </section>
+          <section class="water-experience" aria-labelledby="waterTitle">
+            <div class="water-heading"><div><p class="journal-eyebrow">A DROP THROUGH TIME</p><h2 id="waterTitle">一滴水的黄龙旅行</h2></div><span class="water-duration">约 1 分钟</span></div>
+            <p class="water-lead">跟着一滴水，看时间怎样留下彩池。</p>
+            <div class="water-canvas" id="waterScene" data-render-state="loading">
+              <div class="water-fallback"><div class="fallback-ponds"><span></span><span></span><span></span><span></span></div><p>彩池形成示意</p><small>3D 场景暂不可用，可继续体验下方故事。</small></div>
+              <span class="water-scene-label">微缩黄龙 / 过程示意</span>
+              <div class="water-time-control" id="waterTimeControl" hidden><label for="waterTime">轻推时间，看池沿生长 <output id="waterTimeValue">0%</output></label><input id="waterTime" type="range" min="0" max="100" value="0" aria-describedby="waterTimeHint"/><span id="waterTimeHint">一次水流 → 许多轮水流 · 非真实年限比例</span></div>
+              <div class="water-controls" aria-label="模型视角"><button type="button" data-scene-control="left" aria-label="向左旋转模型"><i data-lucide="rotate-ccw" aria-hidden="true"></i></button><button type="button" data-scene-control="right" aria-label="向右旋转模型"><i data-lucide="rotate-cw" aria-hidden="true"></i></button><button type="button" data-scene-control="zoom" aria-label="放大模型"><i data-lucide="zoom-in" aria-hidden="true"></i></button><button type="button" data-scene-control="reset" aria-label="恢复模型视角"><i data-lucide="scan" aria-hidden="true"></i></button><button type="button" data-scene-control="pause" aria-label="暂停场景动画" aria-pressed="false"><i data-lucide="pause" aria-hidden="true"></i></button></div>
+            </div>
+            <p class="water-gesture">左右轻拖转动山水 · 上下滑动继续阅读</p>
+            <ol class="water-chapters" aria-label="水滴旅程"><li id="waterChapter0">01 <span>水流</span></li><li id="waterChapter1">02 <span>沉积</span></li><li id="waterChapter2">03 <span>时间</span></li></ol>
+            <div class="water-story" aria-live="polite"><span id="waterStageLabel" class="water-stage-label"></span><h3 id="waterStageTitle"></h3><p id="waterStageCopy"></p></div>
+            <button type="button" id="waterAction" class="journal-primary water-action"></button>
+            <p class="water-science">几秒动画，代表长期积累。水携带的溶解物质在条件合适时沉积；水滴本身不会变成石头。场景为艺术化示意。</p>
+          </section>
+          <section class="field-guide" aria-labelledby="fieldGuideTitle">
+            <div class="journal-section-title"><div><p class="journal-eyebrow">A LITTLE DISCOVERY</p><h2 id="fieldGuideTitle">本站的小发现</h2></div><i data-lucide="sparkles" aria-hidden="true"></i></div>
+            <div class="guide-tabs" role="tablist" aria-label="本站攻略"><button role="tab" aria-selected="true" aria-controls="fieldGuidePanel" id="playGuideTab" data-guide-mode="play" type="button">怎么玩</button><button role="tab" aria-selected="false" aria-controls="fieldGuidePanel" id="photoGuideTab" data-guide-mode="photo" type="button" tabindex="-1">怎么拍</button></div>
+            <div class="field-guide-panel" id="fieldGuidePanel" role="tabpanel" aria-labelledby="playGuideTab"></div>
+          </section>
+          <section class="journal-itinerary"><div class="journal-section-title"><div><p class="journal-eyebrow">YOUR FOOTPRINTS</p><h2>沿途，留下一点回忆</h2></div><i data-lucide="footprints" aria-hidden="true"></i></div><div id="followRouteStrip" aria-label="行程中的景点"></div><p id="journalStorage" class="journal-storage">进度与印章保存在此设备。</p></section>
+          <p id="journalAnnouncement" class="journal-announcement" role="status"></p>
         </section>
       </main>
+
+      <dialog class="stamp-dialog" id="stampDialog" aria-labelledby="stampDialogTitle"><div class="stamp-dialog-head"><div><p class="journal-eyebrow">HUANGLONG / TRAVEL JOURNAL</p><h2 id="stampDialogTitle">我的山水印记</h2></div><button type="button" class="icon-command" id="closeStampBook" aria-label="关闭印章册"><i data-lucide="x" aria-hidden="true"></i></button></div><p class="stamp-intro">每一枚，记下你愿意停留的一站。</p><div id="waterBadgeSlot"></div><div class="stamp-grid" id="stampGrid"></div><button type="button" class="journal-primary" id="downloadJournal">生成我的旅行纪念卡</button><div id="journalCardPreview" class="journal-card-preview" hidden><p role="status">纪念卡已生成，可长按图片保存。</p><img id="journalCardImage" alt="我的黄龙旅行纪念卡"/><a id="journalCardDownload" download="我的黄龙旅行纪念卡.png">保存 PNG 图片</a></div><p class="journal-storage">地点印章来自手动到达记录；水滴纪念章来自互动体验。</p></dialog>
 
       <dialog class="poi-dialog" id="poiDialog" aria-labelledby="poiDialogTitle">
         <div class="poi-dialog-shell">

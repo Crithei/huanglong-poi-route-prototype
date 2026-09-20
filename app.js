@@ -223,6 +223,8 @@ const appState = {
   currentPlan: null,
 };
 
+window.HuanglongFollow?.restoreInto(appState, POIS);
+
 const mapRuntime = {
   AMap: null,
   map: null,
@@ -459,45 +461,7 @@ function syncPreferenceControls() {
 
 function renderFollow() {
   const plan = appState.currentPlan || buildPlan(appState.selectedPoiIds, appState.preferences, appState.completedPoiIds);
-  const route = plan.included;
-  const completed = route.filter((poi) => appState.completedPoiIds.has(poi.id));
-  const pending = route.filter((poi) => !appState.completedPoiIds.has(poi.id));
-  const current = pending[0];
-  const done = completed.length;
-  const percent = route.length ? Math.round((done / route.length) * 100) : 0;
-
-  document.querySelector("#followProgressText").textContent = route.length ? `第 ${Math.min(done + 1, route.length)} 站 / 共 ${route.length} 站` : "准备开始";
-  const deferredNames = plan.deferred.map((poi) => poi.name).join("、");
-  document.querySelector("#followTitle").textContent = current
-    ? `下一站：${current.name}`
-    : plan.deferred.length
-      ? "已将后半程留给下次。"
-      : route.length ? "这一段已走完。" : "还没有可跟随的游线。";
-  document.querySelector("#followDescription").textContent = current
-    ? appState.followMessage || `${current.description} 原型根据当前路线显示下一站，不使用实时定位。`
-    : plan.deferred.length
-      ? `${deferredNames} 已从本次计划中移出；可回到游线页重新调整时间和偏好。`
-      : route.length ? "已完成当前计划里的所有节点，可以回到游线页继续调整。" : "返回游线页选择 POI 后开始。";
-  document.querySelector("#followMeter").style.width = `${percent}%`;
-  document.querySelector("#followMeterCopy").textContent = `${done} / ${route.length} 已完成`;
-  document.querySelector("#completeStop").disabled = !current;
-  document.querySelector("#shortenRoute").disabled = pending.length === 0;
-
-  document.querySelector("#followRouteStrip").innerHTML = route.length
-    ? route.map((poi) => {
-        const isComplete = appState.completedPoiIds.has(poi.id);
-        const isCurrent = current?.id === poi.id;
-        return `<button class="follow-stop ${isComplete ? "complete" : ""} ${isCurrent ? "current" : ""}" type="button" data-poi-detail-id="${poi.id}"><i data-lucide="${isComplete ? "check" : isCurrent ? "map-pin" : "circle"}" aria-hidden="true"></i>${poi.name}</button>`;
-      }).join("")
-    : '<span class="follow-stop">未开始</span>';
-
-  const stateView = {
-    selectedPoiIds: [...appState.selectedPoiIds],
-    preferences: appState.preferences,
-    completedPoiIds: [...appState.completedPoiIds],
-    deferredPoiIds: plan.deferred.map((poi) => poi.id),
-  };
-  document.querySelector("#stateOutput").textContent = JSON.stringify(stateView, null, 2);
+  window.HuanglongFollow?.render({state:appState,plan,pois:POIS,renderAll,openPoiDetail,refreshIcons});
 }
 
 function renderAll() {
@@ -525,8 +489,9 @@ function setActiveView(viewName) {
   });
   if (viewName === "map") {
     renderMap(appState.currentPlan || buildPlan(appState.selectedPoiIds, appState.preferences, appState.completedPoiIds));
-    window.setTimeout(() => { mapRuntime.map?.resize(); syncAmapPlan(appState.currentPlan); }, 60);
+    window.setTimeout(() => { if(appState.activeView==='map'){mapRuntime.map?.resize(); syncAmapPlan(appState.currentPlan);} }, 60);
   }
+  if (viewName === "follow") { renderFollow(); refreshIcons(); }
   document.querySelector("main").scrollTo({ top: 0 });
 }
 
@@ -685,27 +650,7 @@ function bindEvents() {
     refreshIcons();
   });
 
-  document.querySelector("#completeStop").addEventListener("click", () => {
-    const current = appState.currentPlan?.included.find((poi) => !appState.completedPoiIds.has(poi.id));
-    if (!current) return;
-    appState.completedPoiIds.add(current.id);
-    appState.followMessage = `已记录抵达 ${current.name}。下一站会根据剩余路线继续显示。`;
-    renderAll();
-  });
-
-  document.querySelector("#shortenRoute").addEventListener("click", () => {
-    appState.preferences.shortageMinutes += 110;
-    appState.followMessage = "已模拟减少 110 分钟可用时间，优先保留后半程中价值更高的 POI。";
-    renderAll();
-  });
-
-  document.querySelector("#stateToggle").addEventListener("click", () => {
-    const button = document.querySelector("#stateToggle");
-    const output = document.querySelector("#stateOutput");
-    const expanded = button.getAttribute("aria-expanded") === "true";
-    button.setAttribute("aria-expanded", String(!expanded));
-    output.hidden = expanded;
-  });
+  document.querySelector("#completeStop").addEventListener("click", () => window.HuanglongFollow?.completeCurrent());
 
   bindMapEvents();
   document.querySelector("#planFacilityWalk").addEventListener("click", planFacilityWalking);
@@ -715,6 +660,9 @@ function bindEvents() {
   document.querySelector("#poiDialog").addEventListener("click", (event) => {
     if (event.target === event.currentTarget) closePoiDetail();
   });
+  if (new URLSearchParams(window.location.search).get('view') === 'follow') {
+    queueMicrotask(() => setActiveView('follow'));
+  }
 }
 
 bindEvents();

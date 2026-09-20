@@ -7,13 +7,16 @@
     "node": ">=22"
   },
   "scripts": {
+    "build:water": "node scripts/build-water-scene.mjs",
     "start": "node server.js",
     "test": "node --test tests/*.test.cjs",
-    "build:cloudflare": "node scripts/build-cloudflare.cjs",
-    "deploy:cloudflare": "node scripts/build-cloudflare.cjs && wrangler deploy --keep-vars",
+    "build:cloudflare": "node scripts/build-water-scene.mjs && node scripts/build-cloudflare.cjs",
+    "deploy:cloudflare": "npm run build:cloudflare && wrangler deploy --keep-vars",
     "refresh:facilities": "node scripts/refresh-facilities.cjs"
   },
   "devDependencies": {
+    "esbuild": "0.25.10",
+    "three": "0.180.0",
     "wrangler": "4.127.1"
   }
 }
