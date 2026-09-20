@@ -294,15 +294,20 @@
               <div class="water-fallback"><div class="fallback-ponds"><span></span><span></span><span></span><span></span></div><p id="waterFallbackTitle">水滴过程示意</p><small id="waterFallbackCopy">3D 暂不可用，仍可通过下方控件完成互动。</small></div>
               <span class="water-scene-label" id="waterSceneLabel">微缩黄龙 / 过程示意</span>
               <span class="water-scene-state" id="waterSceneState">模型预览</span>
+              <div id="co2Interaction" class="co2-interaction" hidden>
+                <button type="button" id="co2Token" class="co2-token" aria-label="CO₂，拖到水滴上，或按回车加入"><span class="molecule-atom"></span><span>CO₂</span><span class="molecule-atom"></span></button>
+                <button type="button" id="co2DropTarget" class="co2-drop-target" tabindex="-1" aria-label="把 CO₂ 放在水滴上"><span class="co2-target-label">让水带上 CO₂</span><svg class="co2-fallback-drop" viewBox="0 0 60 70" aria-hidden="true"><path d="M30 3C24 19 9 31 9 45a21 21 0 0042 0C51 31 36 19 30 3" fill="#62c9ca"/><circle cx="24" cy="44" r="2" fill="#315858"/><circle cx="36" cy="44" r="2" fill="#315858"/></svg></button>
+              </div>
               <div class="water-controls" aria-label="模型视角"><button type="button" data-scene-control="left" aria-label="向左旋转模型"><i data-lucide="rotate-ccw" aria-hidden="true"></i></button><button type="button" data-scene-control="right" aria-label="向右旋转模型"><i data-lucide="rotate-cw" aria-hidden="true"></i></button><button type="button" data-scene-control="zoom" aria-label="放大模型"><i data-lucide="zoom-in" aria-hidden="true"></i></button><button type="button" data-scene-control="reset" aria-label="恢复模型视角"><i data-lucide="scan" aria-hidden="true"></i></button><button type="button" data-scene-control="pause" aria-label="暂停场景动画" aria-pressed="false"><i data-lucide="pause" aria-hidden="true"></i></button></div>
             </div>
-            <p class="water-gesture">左右轻拖旋转 · 点击编号互动 · 下方按钮也可操作</p>
+            <p class="water-gesture" id="waterGesture">左右轻拖旋转 · 轻点水槽改变水流</p>
             <div class="water-unlock" id="waterUnlock"></div>
             <div class="water-story" aria-live="polite"><span id="waterStageLabel" class="water-stage-label"></span><h3 id="waterStageTitle"></h3><p id="waterStageCopy"></p></div>
             <fieldset class="water-game-controls" id="waterGameControls"><legend class="sr-only">本章互动</legend></fieldset>
             <div class="water-game-progress"><span id="waterGameProgress"></span><span id="waterGameReward"></span></div>
             <p class="water-feedback" id="waterGameFeedback" role="status"></p>
             <button type="button" id="waterAction" class="journal-primary water-action"></button>
+            <button type="button" id="waterMotionStep" class="journal-secondary water-motion-step" hidden>查看下一状态</button>
             <p class="water-science" id="waterScience"></p>
           </section>
           <section class="field-guide" aria-labelledby="fieldGuideTitle">

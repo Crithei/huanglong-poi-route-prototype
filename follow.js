@@ -1,14 +1,15 @@
 // Travel journal UI; kept separate from route calculation and the 3D renderer.
 window.HuanglongFollow=(()=>{
   const engine=window.HuanglongJournal,key='huanglong.travel-journal.v1';
-  let journal=engine.create(),context=null,scene=null,bound=false,guideMode='play',paused=false,toastTimer;
+  let journal=engine.create(),context=null,scene=null,bound=false,guideMode='play',paused=false,toastTimer,dragState=null,saveClock=0,uiClock=0,fallbackTimer=null;
+  const motion=window.matchMedia?.('(prefers-reduced-motion: reduce)')||{matches:false};
   const $=selector=>document.querySelector(selector);
   const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const chapterCopy={
-    flow:{scene:'01 / 森林坡面与水道',copy:'三段水槽还没有接上。点击编号转向，顺着左、右、左三个低处连接水路，再放水试试。',finish:'放水，检验我的水路',science:'重力让水沿地势流动。转动水槽是虚拟游戏，现场请留在栈道观察薄水与坡面。',fallback:'山坡来水 → 三段水槽 → 下游。用下方按钮转向接通。'},
-    dissolution:{scene:'02 / 岩层里的微小旅程',copy:'先让水带上二氧化碳，再轻点岩层里的 ①②③。观察岩石轮廓与水中亮点怎样变化，把看不见的溶解过程放大。',finish:'记录这次岩层发现',science:'含二氧化碳的水在适当条件下可溶解碳酸盐岩。亮点代表溶解物，不是碎石。地下剖面为科普示意，不代表洗身洞实测结构，也不要求入洞。',fallback:'含 CO₂ 的水 → 接触岩石 → 携带溶解物。下方三个观察点对应图中编号。'},
-    emergence:{scene:'03 / 从地下，到地表',copy:'寻找能连通地表的裂隙，再把地下水位推到金色出口线以上。看看泉水什么时候出现，怎样流过跌坎。',finish:'记录泉水出露',science:'出露是地下水来到地表；二氧化碳逸出是气体离开水体，两者不同。这里借飞瀑理解过程，不把景点认定为已核实的地下水源口。',fallback:'地下水位达到出口 → 开放裂隙 → 泉水出流。选择中间出口，把水位提升到 65% 以上。'},
-    deposition:{scene:'04 / 时间留下的彩池',copy:'选择三处池沿，分别推演多轮水流。让每一处浅色沉积逐渐增厚，最后拼出属于这滴水的彩池。',finish:'收下彩池营造印记',science:'二氧化碳逸出等条件可促使碳酸钙沉积。累积需要时间，滑杆没有真实年限比例；水滴本身不会变成石头。',fallback:'水携带溶解物 → 合适条件下沉积 → 池沿长期累积。选择三处池沿，再分别推动时间。'},
+    flow:{scene:'源流 / 一直向前的水',copy:'山间的水源一直在流。轻点三段水槽，让水沿坡面接续向前。接通后，跟着径流看看它怎样进入地下。',science:'水流受地形与连通条件影响。转向水槽为虚拟互动，渗流与地下空间是科普示意。',fallback:'源水持续流动 → 三段水槽 → 径流进入地下。使用下方转向按钮。'},
+    dissolution:{scene:'溶解 / 水带走山的一点点',copy:'把 CO₂ 拖到水滴身上。随后静静看：水流进入岩层，石灰岩逐渐缩小，溶解物随水向前。',science:'含 CO₂ 的水在适当条件下可溶解碳酸盐岩。金色粒子表示溶解物，不是石块碎屑。剖面为科普示意，不要求游客入洞。',fallback:'把 CO₂ 拖给水滴，或使用下方加入按钮。过程会自动演示，不需要再点击观察点。'},
+    emergence:{scene:'出露 / 山的另一面',copy:'轻推水位，看看山体剖面里的水慢慢升高。达到出口高度时，泉水从岩层渗出，CO₂ 随着水来到地表逐渐逸散。',science:'出露指地下水来到地表，CO₂ 逸出指气体离开水体。山体剖面是解释模型，非现场测绘；水位刻度无实际海拔含义。',fallback:'调整水位；达到 65% 的出口高度后，观察泉水出流与气体逸出。'},
+    deposition:{scene:'沉积 / 让风景慢慢长出来',copy:'下方的彩池还没有出现。让一道池沿慢慢长起，再看水蓄满、越过池沿流下去。随后，在下一片低处继续生成新的彩池。',science:'池沿生长、蓄水与溢流在自然界相互交织，这里分段呈现便于观察；演示时间不对应真实年限。沉积来自溶解物，水不会变成石头。',fallback:'每一轮依次播放：池沿生长 → 蓄水 → 溢流。完成一轮后再生成下一池，共三池。'},
   };
   const games={
     'five-color-pond':{title:'找一条属于你的彩池弧线',task:'先看整片池群，再选三处形状不同的池沿。试着用手指在空中描出它们的弧线，看看哪一段最像扇面。',photo:'让池沿带着视线向远处走',compose:'选一条弯曲池沿作为画面起点，把后方彩池留在上半部。拍完全景，再选相邻的两种水色拍一张局部。',tip:'只在开放栈道选角度；附近休息亭不一定就是全景机位。'},
@@ -17,7 +18,7 @@ window.HuanglongFollow=(()=>{
   };
   function save(){try{localStorage.setItem(key,JSON.stringify(journal));$('#journalStorage').textContent='进度与印章保存在此设备。';}catch{$('#journalStorage').textContent='当前浏览器无法保存进度；本次仍可体验，关闭后可能丢失。';}}
   function restoreInto(state,pois){
-    let raw=null;try{raw=localStorage.getItem(key);if(raw&&JSON.parse(raw)?.version===1&&!localStorage.getItem(key+'.backup'))localStorage.setItem(key+'.backup',raw);}catch{}
+    let raw=null;try{raw=localStorage.getItem(key);if(raw){const version=JSON.parse(raw)?.version,backup=version===1?key+'.backup':key+'.v2.backup';if([1,2].includes(version)&&!localStorage.getItem(backup))localStorage.setItem(backup,raw);}}catch{}
     journal=engine.restore(raw,pois.map(p=>p.id));
     if(journal.selected!==null)state.selectedPoiIds=new Set(journal.selected);
     state.completedPoiIds=new Set(journal.completed);state.preferences={...state.preferences,...journal.preferences};
@@ -56,29 +57,43 @@ window.HuanglongFollow=(()=>{
     $('#waterStageLabel').textContent=c.label.toUpperCase()+' / '+c.poiIds.map(name).join(' · ');$('#waterStageTitle').textContent=c.title;$('#waterStageCopy').textContent=copy.copy;$('#waterScience').textContent=copy.science;
     const unlock=$('#waterUnlock');unlock.hidden=unlocked;
     unlock.innerHTML=unlocked?'':`<div class="unlock-title"><i data-lucide="map-pin" aria-hidden="true"></i><strong>到达关联景点，打开这一章</strong></div><p>任意到达下列一处即可。当前使用手动打卡。</p><label for="chapterArrivalPoi">我此刻在</label><select id="chapterArrivalPoi">${c.poiIds.map(poiId=>`<option value="${poiId}">${escape(name(poiId))}</option>`).join('')}</select><div><button type="button" class="journal-primary" data-chapter-checkin>我已到达 · 打卡解锁</button><button type="button" class="journal-secondary" data-chapter-poi>景点介绍</button></div>`;
-    const controls=$('#waterGameControls');controls.disabled=!unlocked||p.won;
-    const button=(action,value,label,selected=false)=>`<button type="button" data-game-action="${action}" data-game-value="${value}" aria-pressed="${selected}" class="game-choice ${selected?'selected':''}">${label}</button>`;
-    if(id==='flow')controls.innerHTML=`<legend>接通三段水路</legend><div class="game-three">${p.channels.map((v,i)=>button('turn',i,`<span>水槽 ${i+1}</span><strong>${v?'↙ 向左':'↘ 向右'}</strong>`,v===[1,0,1][i])).join('')}</div><p>从上往下，低处依次在左、右、左。点击水槽转向。</p>`;
-    if(id==='dissolution')controls.innerHTML=`<legend>岩层观察实验</legend>${button('charge','',p.charged?'✓ 含 CO₂ 的水已进入':'① 让水带上二氧化碳',p.charged)}<div class="game-three">${[0,1,2].map(i=>button('observe',i,`<span>溶解点 ${i+1}</span><strong>${p.sites.includes(i)?'✓ 已观察':'轻点观察'}</strong>`,p.sites.includes(i))).join('')}</div><p>先准备水，再观察岩石。再次点击同一点不重复计数。</p>`;
-    if(id==='emergence')controls.innerHTML=`<legend>寻找出露的条件</legend><div class="game-three">${['封闭支路','开放裂隙','岩层阻挡'].map((label,i)=>button('outlet',i,`<span>出口 ${i+1}</span><strong>${label}</strong>`,p.outlet===i)).join('')}</div><label class="game-range-label" for="groundwaterLevel">地下水位 <output id="groundwaterValue">${Math.round(p.level)}%</output></label><input id="groundwaterLevel" type="range" min="0" max="100" value="${p.level}" data-game-slider="level"/><p>金色标线是出口高度：65%。水位高于开放出口时，地表开始出流。</p>`;
-    if(id==='deposition')controls.innerHTML=`<legend>给彩池留下一圈时间</legend><div class="game-three">${p.layers.map((n,i)=>button('rim',i,`<span>池沿 ${i+1}</span><strong>${Math.round(n*100)}%</strong>`,p.rim===i)).join('')}</div><label class="game-range-label" for="depositTime">池沿 ${p.rim+1} · 累积过程 <output id="depositValue">${Math.round(p.layers[p.rim]*100)}%</output></label><input id="depositTime" type="range" min="0" max="100" value="${p.layers[p.rim]*100}" data-game-slider="time"/><p>把时间推至右端，再换下一处池沿。进度代表演示过程，不是真实年限。</p>`;
-    const action=$('#waterAction');action.textContent=p.won?'重新体验本章':unlocked?copy.finish:'到站打卡后开始';action.disabled=!unlocked;action.classList.toggle('completed',p.won);
-    $('#waterGameFeedback').textContent=p.won?'已收下「'+c.reward+'」。你可以按自己的游线，继续解锁其他章节。':unlocked?'已解锁，试试上方模型编号或下方控件。':'模型可预览，小游戏等待你到达。';
+    const controls=$('#waterGameControls');controls.disabled=!unlocked;
+    const button=(action,value,label)=>`<button type="button" data-game-action="${action}" data-game-value="${value}" class="game-choice">${label}</button>`;
+    if(id==='flow')controls.innerHTML=`<legend>转动水槽，让水自己找到路</legend><div class="game-three flow-switches">${p.channels.map((v,i)=>button('turn',i,`<span>${['上游','中游','下游'][i]}</span><strong>${v?'↙':'↘'} 转向</strong>`)).join('')}</div><p>轻点模型中的水槽也可以转向，水源会一直流动。</p>`;
+    if(id==='dissolution')controls.innerHTML=`<legend>让水带上 CO₂</legend>${p.charged?'<p class="process-observation">顺着水流看，石灰岩的轮廓正在慢慢改变。</p>':button('charge','','也可点击，把 CO₂ 交给水滴')}<div class="process-meter"><span id="processMeterFill"></span></div>`;
+    if(id==='emergence')controls.innerHTML=`<legend>山体中的地下水位</legend><label class="game-range-label" for="groundwaterLevel">低处汇水 <output id="groundwaterValue">${Math.round(p.level)}%</output></label><input id="groundwaterLevel" type="range" min="0" max="100" value="${p.level}" data-game-slider="level"/><p>慢慢推过出口线，观察泉流与逸出的气泡。完成后仍可调整水位。</p>`;
+    if(id==='deposition')controls.innerHTML=`<legend>${p.sequence===9?'三片新彩池，连成一段风景':'正在生成第 '+(Math.floor(p.sequence/3)+1)+' 片新彩池'}</legend><div class="pool-phase-track">${['池沿生长','水流积累','水流溢出'].map((label,i)=>`<span class="${p.sequence<9&&p.sequence%3===i?'current':''}">${label}</span>`).join('')}</div><div class="process-meter"><span id="processMeterFill"></span></div><p>一轮结束后，再让下一片彩池出现。</p>`;
+    $('#co2Interaction').hidden=id!=='dissolution'||!unlocked||p.charged;
+    if($('#co2Interaction').hidden)cancelDrag();
+    $('#waterGesture').textContent=id==='flow'?'轻点水槽转向 · 左右轻拖旋转山水':id==='dissolution'?'把 CO₂ 拖到水滴上 · 左右轻拖旋转岩层':id==='emergence'?'拖动下方水位 · 看地下水如何遇见天空':'左右轻拖旋转 · 看池沿生长、蓄水与溢流';
+    $('#waterGameFeedback').textContent=p.won?'已收下「'+c.reward+'」，过程动画仍可继续观看。':unlocked?'准备好了，让过程在眼前发生。':'模型可预览，互动等待你到达。';
     syncGame();
   }
-  function syncGame(){
-    const id=journal.activeChapter,p=journal.chapters[id],c=engine.CHAPTERS.find(c=>c.id===id);
-    $('#waterGameProgress').textContent=id==='flow'?`${p.channels.filter((v,i)=>v===[1,0,1][i]).length} / 3 段方向正确`:id==='dissolution'?`${p.sites.length} / 3 处已观察`:id==='emergence'?(p.outlet===1&&p.level>=65?'泉水已经出露':'等待水位与出口连通'):`${p.layers.filter(v=>v===1).length} / 3 处沉积完成`;
-    $('#waterGameReward').textContent=p.earnedAt?'✓ '+c.reward:'本章印记 · '+c.reward;
-    scene?.setChapter(id,p,engine.isChapterUnlocked(journal,id));
+  function syncGame(updateScene=true){
+    const id=journal.activeChapter,p=journal.chapters[id],c=engine.CHAPTERS.find(c=>c.id===id),unlocked=engine.isChapterUnlocked(journal,id);
+    const status=id==='flow'?(p.channels.every((v,i)=>v===[1,0,1][i])?'径流正在进入地下':'源水流动中 · 转动水槽连接水路'):id==='dissolution'?(p.charged?(p.elapsed>=8?'溶解物随水流向远方':'石灰岩正在溶解…'):'等待水带上 CO₂'):id==='emergence'?(p.level>=65?'泉水出露 · CO₂ 缓缓逸散':'地下水位尚未到达出口'):p.sequence===9?'三片新彩池已生成':p.running?['池沿正在生长…','水正在蓄满新池…','水正越过池沿…'][p.sequence%3]:'等待下一片彩池生成';
+    $('#waterGameProgress').textContent=status;$('#waterGameReward').textContent=p.earnedAt?'✓ '+c.reward:'完成后收下 · '+c.reward;
+    const fill=$('#processMeterFill');if(fill)fill.style.width=(id==='dissolution'?p.elapsed/8*100:id==='deposition'?(p.sequence===9?100:(p.sequence%3+p.fraction)/3*100):0)+'%';
+    const action=$('#waterAction');action.hidden=unlocked&&!p.won&&id!=='deposition';action.disabled=!unlocked||(id==='deposition'&&p.running);action.textContent=!unlocked?'到站打卡后开始':p.won?'重新体验本章':p.running?status:p.sequence===0?'让第一道池沿生长':'在下方生成下一片彩池';action.classList.toggle('completed',p.won);
+    $('#waterMotionStep').hidden=!motion.matches||!unlocked||p.won;
+    $('#waterMotionStep').disabled=id==='flow'?!p.channels.every((v,i)=>v===[1,0,1][i]):id==='dissolution'?!p.charged:id==='emergence'?p.level<65:!p.running;
+    if(updateScene)scene?.setChapter(id,p,unlocked);
   }
   function play(action,value,slider=false){
     const result=engine.playChapter(journal,journal.activeChapter,action,value);save();
-    if(slider){syncGame();const p=journal.chapters[journal.activeChapter];if(action==='level')$('#groundwaterValue').textContent=Math.round(p.level)+'%';if(action==='time'){$('#depositValue').textContent=Math.round(p.layers[p.rim]*100)+'%';$('#depositTime').value=p.layers[p.rim]*100;const choices=$('#waterGameControls').querySelectorAll('.game-choice strong');choices[p.rim].textContent=Math.round(p.layers[p.rim]*100)+'%';}}
+    if(slider){syncGame();if(action==='level')$('#groundwaterValue').textContent=Math.round(journal.chapters.emergence.level)+'%';}
     else{renderGame();renderBook();context.refreshIcons();}
     $('#waterGameFeedback').textContent=result.message;
-    if(result.earned)announce(result.message+(journal.chapterBadgeAt?' 四章集齐，获得「山水同行者」！':''));
   }
+  function tickAnimation(id,dt,force=false){
+    if(!context||context.state.activeView!=='follow'||id!==journal.activeChapter||((paused||motion.matches||document.hidden)&&!force))return;
+    const result=engine.tickChapter(journal,id,dt);if(!result.changed)return;
+    saveClock+=dt;uiClock+=dt;
+    if(result.phaseChanged){renderGame();renderBook();context.refreshIcons();save();saveClock=0;}else if(uiClock>.12){syncGame(false);uiClock=0;}
+    if(saveClock>=1){save();saveClock=0;}
+    if(result.earned)announce(result.message+(journal.chapterBadgeAt?' 四章已集齐。':''));
+  }
+  function cancelDrag(){if(!dragState)return;const token=$('#co2Token'),id=dragState.id;dragState=null;try{token.releasePointerCapture?.(id);}catch{}token.style.transform='';token.classList.remove('dragging');$('#co2DropTarget').classList.remove('receiving');}
   function downloadJournal(){
     const places=context.pois.filter(p=>journal.stamps[p.id]);
     const canvas=document.createElement('canvas');canvas.width=720;canvas.height=Math.max(850,710+Math.ceil(places.length/2)*94);
@@ -127,8 +142,19 @@ window.HuanglongFollow=(()=>{
     });
     $('#waterGameControls').addEventListener('click',e=>{const b=e.target.closest('[data-game-action]');if(!b)return;const action=b.dataset.gameAction,value=b.dataset.gameValue;play(action,value===''?undefined:Number(value));$(`[data-game-action="${action}"][data-game-value="${value}"]`)?.focus({preventScroll:true});});
     $('#waterGameControls').addEventListener('input',e=>{if(e.target.dataset.gameSlider)play(e.target.dataset.gameSlider,Number(e.target.value),true);});
-    $('#waterAction').addEventListener('click',()=>{if(journal.chapters[journal.activeChapter].won){engine.resetChapter(journal,journal.activeChapter);save();renderGame();context.refreshIcons();}else play('finish');});
-    window.addEventListener('pagehide',event=>{if(!event.persisted){scene?.dispose();scene=null;}});
+    $('#waterAction').addEventListener('click',()=>{if(journal.chapters[journal.activeChapter].won){engine.resetChapter(journal,journal.activeChapter);save();renderGame();context.refreshIcons();}else if(journal.activeChapter==='deposition')play('start');});
+    $('#waterMotionStep').addEventListener('click',()=>{const id=journal.activeChapter,p=journal.chapters[id],step=p.sequence;for(let i=0;i<34&&!p.won;i++){tickAnimation(id,.25,true);if(id==='deposition'&&p.sequence!==step)break;}renderGame();});
+    const token=$('#co2Token'),target=$('#co2DropTarget');
+    const isOver=(x,y)=>{const rect=target.getBoundingClientRect();return x>=rect.left-12&&x<=rect.right+12&&y>=rect.top-12&&y<=rect.bottom+12;};
+    token.addEventListener('pointerdown',e=>{if(e.button!==0||$('#co2Interaction').hidden)return;e.preventDefault();dragState={id:e.pointerId,x:e.clientX,y:e.clientY};token.setPointerCapture?.(e.pointerId);token.classList.add('dragging');});
+    token.addEventListener('pointermove',e=>{if(!dragState||dragState.id!==e.pointerId)return;token.style.transform='translate('+(e.clientX-dragState.x)+'px,'+(e.clientY-dragState.y)+'px)';target.classList.toggle('receiving',isOver(e.clientX,e.clientY));});
+    token.addEventListener('pointerup',e=>{if(!dragState||dragState.id!==e.pointerId)return;const accepted=isOver(e.clientX,e.clientY);cancelDrag();if(accepted)play('charge');else $('#waterGameFeedback').textContent='把 CO₂ 拖到水滴身上，再松开。';});
+    token.addEventListener('pointercancel',cancelDrag);token.addEventListener('lostpointercapture',cancelDrag);
+    token.addEventListener('click',e=>{if(e.detail===0&&!$('#co2Interaction').hidden)play('charge');});
+    fallbackTimer=window.setInterval(()=>{if((!scene||$('#waterScene').dataset.renderState==='fallback')&&!document.hidden){const rect=$('#waterScene').getBoundingClientRect();if(rect.bottom>0&&rect.top<window.innerHeight&&rect.width>0)tickAnimation(journal.activeChapter,.1);}},100);
+    motion.addEventListener?.('change',()=>{renderGame();context.refreshIcons();});
+    window.addEventListener('pagehide',event=>{save();cancelDrag();if(!event.persisted){window.clearInterval(fallbackTimer);scene?.dispose();scene=null;}});
+    document.addEventListener('visibilitychange',()=>{if(document.hidden)save();});
   }
   function render(next){
     context=next;bind();const state=context.state,plan=context.plan;
@@ -141,7 +167,7 @@ window.HuanglongFollow=(()=>{
     $('#completeStop').textContent=arrived?'逛完了 · 前往下一站':'我已到达 · 收下印章';$('#completeStop').disabled=!poi;$('#followDetail').disabled=!plan.included.length;
     $('#followMeter').style.width=(plan.included.length?done/plan.included.length*100:0)+'%';$('#followMeterCopy').textContent=`${done} 站完成 · ${Object.keys(journal.stamps).length} 处到达记录`;
     $('#followRouteStrip').innerHTML=plan.included.map(p=>`<button type="button" class="journal-stop" data-poi-detail-id="${escape(p.id)}"><span class="mini-stamp">${stamp(p,!!journal.stamps[p.id])}</span><span><strong>${escape(p.name)}</strong><small>${state.completedPoiIds.has(p.id)?'已游览':journal.arrived===p.id?'正在游览':journal.stamps[p.id]?'印章已收集':'沿途待发现'}</small></span><i data-lucide="arrow-up-right" aria-hidden="true"></i></button>`).join('')||'<p class="journal-storage">选好景点后，这里会留下你的旅行顺序。</p>';
-    if(state.activeView==='follow'&&!scene){scene=window.HuanglongWaterScene?.mount($('#waterScene'),{onInteract:(action,value)=>play(action,value)});if(!scene)$('#waterScene').dataset.renderState='fallback';}
+    if(state.activeView==='follow'&&!scene){scene=window.HuanglongWaterScene?.mount($('#waterScene'),{onInteract:(action,value)=>play(action,value),onTick:tickAnimation});if(!scene)$('#waterScene').dataset.renderState='fallback';}
     renderGuide(poi||plan.included.at(-1));renderBook();renderGame();save();
   }
   function completeCurrent(){const poi=current();if(!poi)return;if(journal.arrived===poi.id){if(engine.depart(journal,poi.id))context.state.completedPoiIds.add(poi.id);}else if(engine.arrive(journal,poi.id,context.pois.map(p=>p.id))){const c=engine.CHAPTERS.find(c=>c.poiIds.includes(poi.id));if(c)journal.activeChapter=c.id;announce(`收下「${poi.name}」风景印章${c?'，解锁「'+c.label+'」章节':''}`);}save();context.renderAll();}

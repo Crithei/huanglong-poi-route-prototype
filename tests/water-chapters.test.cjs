@@ -2,12 +2,13 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const f=require('../follow-state.js');
 const ids=['welcome-pond','jinsha-pudi','wash-body-viewpoint','flying-waterfall','liantai-fall','five-color-pond','bonsai-pond','zhengyan-chi'];
+function advance(s,id,seconds){let result;for(let t=0;t<seconds;t+=.1)result=f.tickChapter(s,id,.1);return result;}
 function finish(s,id){
-  if(id==='flow'){f.playChapter(s,id,'turn',0);f.playChapter(s,id,'turn',2);}
-  if(id==='dissolution'){f.playChapter(s,id,'charge');for(let i=0;i<3;i++)f.playChapter(s,id,'observe',i);}
-  if(id==='emergence'){f.playChapter(s,id,'outlet',1);f.playChapter(s,id,'level',80);}
-  if(id==='deposition')for(let i=0;i<3;i++){f.playChapter(s,id,'rim',i);f.playChapter(s,id,'time',100);}
-  return f.playChapter(s,id,'finish');
+  if(id==='flow'){f.playChapter(s,id,'turn',0);f.playChapter(s,id,'turn',2);advance(s,id,5);}
+  if(id==='dissolution'){f.playChapter(s,id,'charge');advance(s,id,9);}
+  if(id==='emergence'){f.playChapter(s,id,'level',80);advance(s,id,5);}
+  if(id==='deposition')for(let i=0;i<3;i++){f.playChapter(s,id,'start');advance(s,id,10);}
+  return {completed:s.chapters[id].won,earned:!!s.chapters[id].earnedAt};
 }
 test('locked chapters refuse all game mutations and choosing POIs never unlocks them',()=>{
   const s=f.create();s.selected=ids;
@@ -23,22 +24,30 @@ test('arrivals unlock independent chapters, even in reverse route order',()=>{
 });
 test('each puzzle requires its own interaction; replay keeps earned rewards without duplication',()=>{
   const s=f.create();ids.forEach(id=>f.checkIn(s,id,ids));
-  for(const c of f.CHAPTERS){assert.equal(f.playChapter(s,c.id,'finish').completed,false);assert.equal(finish(s,c.id).completed,true);const stamp=s.chapters[c.id].earnedAt;f.resetChapter(s,c.id);assert.equal(s.chapters[c.id].earnedAt,stamp);assert.equal(s.chapters[c.id].won,false);assert.equal(finish(s,c.id).earned,false);assert.equal(s.chapters[c.id].earnedAt,stamp);}
+  for(const c of f.CHAPTERS){assert.equal(f.playChapter(s,c.id,'finish').completed,false);assert.equal(finish(s,c.id).completed,true);const stamp=s.chapters[c.id].earnedAt;f.resetChapter(s,c.id);assert.equal(s.chapters[c.id].earnedAt,stamp);assert.equal(s.chapters[c.id].won,false);finish(s,c.id);assert.equal(s.chapters[c.id].earnedAt,stamp);}
 });
-test('invalid actions cannot solve a puzzle and dissolved sites deduplicate',()=>{
-  const s=f.create();ids.forEach(id=>f.checkIn(s,id,ids));
-  assert.equal(f.playChapter(s,'dissolution','observe',0).ok,false);
-  f.playChapter(s,'dissolution','charge');for(let n=0;n<8;n++)f.playChapter(s,'dissolution','observe',0);
-  assert.deepEqual(s.chapters.dissolution.sites,[0]);assert.equal(f.playChapter(s,'dissolution','finish').completed,false);
-  for(const value of [NaN,Infinity,-1,101,'100'])assert.equal(f.playChapter(s,'emergence','level',value).ok,false);
-  assert.equal(f.playChapter(s,'deposition','rim',9).ok,false);assert.equal(f.playChapter(s,'unknown','finish').ok,false);
+test('old observation and outlet actions are removed; time cannot skip animations',()=>{
+ const s=f.create();ids.forEach(id=>f.checkIn(s,id,ids));
+ for(const [id,action,value] of [['dissolution','observe',0],['emergence','outlet',1],['deposition','time',100],['deposition','rim',2]])assert.equal(f.playChapter(s,id,action,value).ok,false);
+ f.playChapter(s,'dissolution','charge');f.tickChapter(s,'dissolution',10000);assert.ok(s.chapters.dissolution.elapsed<=.25);assert.equal(s.chapters.dissolution.won,false);
+ for(const value of [NaN,Infinity,-1,101,'100'])assert.equal(f.playChapter(s,'emergence','level',value).ok,false);
+ const before=JSON.stringify(s);f.tickChapter(s,'dissolution',NaN);f.tickChapter(s,'dissolution',-1);assert.equal(JSON.stringify(s),before);
 });
 test('v1 migration preserves real stamps and old badge but does not award new chapter completion',()=>{
   const old={version:1,stamps:{'five-color-pond':'2026-09-20T08:00:00Z'},completed:['five-color-pond'],gameStep:3,waterBadge:true};
-  const s=f.restore(JSON.stringify(old),ids);assert.equal(s.version,2);assert.equal(s.waterBadge,true);assert.equal(f.isChapterUnlocked(s,'deposition'),true);assert.equal(s.chapters.deposition.earnedAt,null);assert.equal(s.chapterBadgeAt,null);
+  const s=f.restore(JSON.stringify(old),ids);assert.equal(s.version,3);assert.equal(s.waterBadge,true);assert.equal(f.isChapterUnlocked(s,'deposition'),true);assert.equal(s.chapters.deposition.earnedAt,null);assert.equal(s.chapterBadgeAt,null);
 });
-test('v2 restore keeps partial puzzle and replay rewards, rejects reward without arrival',()=>{
-  const s=f.create();f.checkIn(s,'five-color-pond',ids);finish(s,'deposition');f.resetChapter(s,'deposition');f.playChapter(s,'deposition','rim',2);f.playChapter(s,'deposition','time',42);
-  const restored=f.restore(JSON.stringify(s),ids);assert.equal(restored.chapters.deposition.layers[2],.42);assert.ok(restored.chapters.deposition.earnedAt);assert.equal(restored.chapters.deposition.won,false);
-  delete s.stamps['five-color-pond'];const invalid=f.restore(JSON.stringify(s),ids);assert.equal(invalid.chapters.deposition.earnedAt,null);assert.deepEqual(invalid.chapters.deposition.layers,[0,0,0]);
+test('v3 restores partial sequence, earned replay rewards, and rejects progress without arrival',()=>{
+ const s=f.create();f.checkIn(s,'five-color-pond',ids);finish(s,'deposition');f.resetChapter(s,'deposition');f.playChapter(s,'deposition','start');advance(s,'deposition',4);
+ const restored=f.restore(JSON.stringify(s),ids);assert.equal(restored.chapters.deposition.sequence,1);assert.ok(restored.chapters.deposition.fraction>0);assert.ok(restored.chapters.deposition.earnedAt);assert.equal(restored.chapters.deposition.won,false);
+ delete s.stamps['five-color-pond'];const invalid=f.restore(JSON.stringify(s),ids);assert.equal(invalid.chapters.deposition.earnedAt,null);assert.equal(invalid.chapters.deposition.sequence,0);
+});
+test('v2 migration preserves earned chapters but unfinished old observation tasks restart',()=>{
+ const s=f.create();s.version=2;ids.forEach(id=>f.checkIn(s,id,ids));s.chapters.dissolution={charged:true,sites:[0,1],won:false,earnedAt:null};s.chapters.deposition={rim:2,layers:[1,1,1],won:true,earnedAt:'2026-09-20T08:00:00Z'};
+ const restored=f.restore(JSON.stringify(s),ids);assert.equal(restored.chapters.dissolution.elapsed,0);assert.equal(restored.chapters.dissolution.won,false);assert.equal(restored.chapters.deposition.sequence,9);assert.equal(restored.chapters.deposition.won,true);
+});
+test('deposition pauses between ponds and cannot fill a pool before its rim',()=>{
+ const s=f.create();f.checkIn(s,'five-color-pond',ids);advance(s,'deposition',20);assert.equal(s.chapters.deposition.sequence,0);
+ f.playChapter(s,'deposition','start');advance(s,'deposition',1);assert.equal(s.chapters.deposition.sequence,0);assert.ok(s.chapters.deposition.fraction>0);
+ advance(s,'deposition',20);assert.equal(s.chapters.deposition.sequence,3);assert.equal(s.chapters.deposition.running,false);assert.equal(s.chapters.deposition.won,false);
 });

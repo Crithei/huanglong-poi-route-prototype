@@ -63,11 +63,7 @@
 .water-canvas { height:365px; margin-top:8px; isolation:isolate; }
 .water-canvas[data-chapter="dissolution"] { background:radial-gradient(ellipse at 50% 60%,#d6cdb4,transparent 70%); }
 .water-canvas[data-chapter="emergence"] { background:radial-gradient(ellipse at 50% 60%,#c9e2db,transparent 70%); }
-.water-model-pins { position:absolute; inset:0; pointer-events:none; z-index:2; }
-.water-pin-lines { position:absolute; inset:0; width:100%; height:100%; overflow:visible; pointer-events:none; }.water-pin-lines line { stroke:#f6f4d9; stroke-width:1.5; stroke-dasharray:3 3; }
-.water-model-pin { position:absolute; transform:translate(-50%,-50%); pointer-events:auto; min-width:44px; min-height:44px; display:grid; place-items:center; border:1px solid #f8f4d3; border-radius:50%; background:#315e4cdf; color:#fff9d9; font-family:Georgia,serif; font-size:17px; box-shadow:0 3px 12px #173d3528; }
-.water-model-pin:disabled { pointer-events:none; opacity:.6; }.water-model-pin:hover { background:#b1944f; }
-.water-model-pin[hidden] { display:none; }.water-controls { z-index:3; }.water-scene-label { z-index:3; font-size:9px; letter-spacing:.6px; }
+.water-controls { z-index:3; }.water-scene-label { z-index:3; font-size:9px; letter-spacing:.6px; }
 .water-scene-state { position:absolute; left:23px; top:35px; z-index:3; font-size:9px; padding:4px 8px; border:1px solid #99af9760; border-radius:20px; background:#f7f7e9bb; color:#64785c; }
 .water-gesture { margin-bottom:15px; }
 .water-unlock { margin:0 20px 5px; padding:15px; border:1px dashed #b2bea4; border-radius:12px; background:#fcfbefb3; }
@@ -90,3 +86,34 @@
 .water-fallback small { max-width:260px; padding:8px 15px; line-height:1.8; }.water-canvas[data-chapter="dissolution"] .fallback-ponds span { border-radius:3px; background:#b5c7b0; transform:rotate(0); }.water-canvas[data-chapter="emergence"] .fallback-ponds span { border-radius:4px 60% 4px 30%; }.water-canvas[data-chapter="flow"] .fallback-ponds span { border-radius:30%; height:25px; }
 .water-experience button:focus-visible,.water-experience select:focus-visible,.water-experience input:focus-visible { outline:2px solid #b1893d; outline-offset:3px; }
 @container(max-width:350px) { .water-chapter-grid { margin-inline:14px; gap:7px; }.chapter-card { padding:10px; }.chapter-card strong { font-size:17px; }.water-canvas { height:330px; }.water-scene-label,.water-scene-state { left:17px; }.water-unlock { margin-inline:15px; padding:12px; }.water-game-controls { margin-inline:15px; padding-inline:8px; }.game-choice strong { font-size:11px; }.water-story h3 { font-size:21px; }.water-heading h2 { font-size:24px; } }
+
+/* Controls step back; water, rock and time carry the story. */
+.water-canvas { height:405px; background:radial-gradient(ellipse at 50% 63%,#ceddc877,transparent 70%); }
+.water-scene-label { font-size:8px; color:#718572; top:12px; }
+.water-scene-state { font-size:8px; color:#788970; border:0; padding:0; background:none; top:29px; }
+.water-controls { background:#f8faed9c; border-color:#d5dfc566; gap:0; padding:1px; right:18px; }
+.water-controls button { background:transparent; color:#6e866c; }.water-controls svg { width:14px; height:14px; }
+.water-gesture { color:#8d9783; font-size:9px; margin:7px 16px 17px; }
+.water-game-controls { border:0; border-radius:0; border-top:1px solid #d9e1d0; padding:14px 0 3px; background:none; }
+.water-game-controls legend { color:#718363; padding-left:0; font-weight:500; }
+.flow-switches .game-choice { background:#f6f8ed88; border-color:#c6d4bd; border-radius:20px; min-height:49px; }
+.flow-switches .game-choice span { display:inline; font-size:10px; margin-right:6px; }.flow-switches .game-choice strong { display:inline; font-size:11px; }
+.water-game-controls [data-game-action="charge"] { background:transparent; border:1px dashed #c5d2bc; color:#839377; font-size:11px; }
+.process-observation { text-align:center; }
+.process-meter { height:3px; background:#e0e7d8; margin:14px 0 9px; overflow:hidden; border-radius:4px; }.process-meter > span { display:block; height:100%; width:0; background:#83b5a1; transition:width .15s linear; }
+.pool-phase-track { display:flex; gap:5px; justify-content:space-between; font-size:10px; color:#9aa48e; margin:5px 0 12px; }.pool-phase-track span { flex:1; text-align:center; padding:7px 1px; border-bottom:1px solid #dae1d0; }.pool-phase-track .current { color:#4b8067; border-color:#7cab8d; }
+.water-game-progress { font-size:9px; gap:7px; line-height:1.7; color:#829477; }.water-game-progress span:first-child { flex:1; min-width:110px; }
+.water-motion-step { margin:10px 22px 0; width:calc(100% - 44px); min-height:44px; border:1px dashed #adbfa0; }
+.co2-interaction { position:absolute; inset:0; z-index:4; pointer-events:none; }
+.co2-token { position:absolute; right:23px; top:64px; display:flex; align-items:center; gap:0; justify-content:center; min-width:85px; height:49px; padding:5px; border:1px solid #c6d0b6; border-radius:25px; background:#f9f6e7ed; color:#647f73; box-shadow:0 5px 18px #34594b18; pointer-events:auto; touch-action:none; cursor:grab; font-family:Georgia,serif; font-size:14px; user-select:none; }
+.co2-token > span:nth-child(2) { position:relative; z-index:1; background:#d8ddc2; padding:9px 6px; border-radius:50%; }.molecule-atom { width:15px; height:15px; border-radius:50%; background:#c5dad0; border:1px solid #fff8; margin:0 -1px; }
+.co2-token.dragging { z-index:8; cursor:grabbing; box-shadow:0 10px 26px #244e3e33; }
+.co2-drop-target { position:absolute; left:50%; top:47%; transform:translate(-50%,-50%); width:74px; height:82px; min-height:44px; border:1px dashed #86b6a066; border-radius:48%; background:none; padding:0; pointer-events:none; transition:background .2s,border-color .2s; }
+.co2-target-label { position:absolute; width:112px; left:50%; bottom:calc(100% + 4px); transform:translateX(-50%); color:#739380; font-size:10px; font-weight:400; white-space:nowrap; pointer-events:none; }
+.co2-drop-target.receiving { background:#b9e3d177; border:1px solid #609783; }.co2-drop-target.receiving .co2-target-label { color:#3a7159; }
+.co2-fallback-drop { display:none; width:50px; height:62px; margin:auto; }[data-render-state="fallback"] .co2-fallback-drop { display:block; }
+[data-render-state="fallback"]:has(.co2-interaction:not([hidden])) .fallback-ponds { visibility:hidden; }
+[data-render-state="fallback"]:has(.co2-interaction:not([hidden])) .water-fallback p { margin-top:125px; }
+.co2-token:focus-visible { outline:2px solid #548d72; outline-offset:4px; }
+@container(max-width:350px) { .water-canvas { height:365px; }.co2-token { right:17px; top:54px; min-width:76px; }.water-controls { right:14px; }.flow-switches .game-choice span { margin-right:3px; }.flow-switches .game-choice strong { font-size:10px; } }
+@media(prefers-reduced-motion:reduce) { .process-meter > span,.co2-drop-target { transition:none; } }

@@ -10,7 +10,8 @@ export const POOLS=[
   {x:-.65,z:3.05,y:.7,rx:2.4,rz:1.4,color:0x72d8c6},
   {x:.5,z:4.5,y:.23,rx:1.9,rz:1.0,color:0x34bab7},
 ];
-export function createLandscape(){
+export function createLandscape({poolCount=POOLS.length}={}){
+  const activePools=POOLS.slice(0,Math.max(1,Math.min(POOLS.length,Math.floor(poolCount))));
   let seed=19092026;
   const random=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296;};
   const root=new THREE.Group();root.name='Huanglong • a drop through time';
@@ -48,7 +49,7 @@ export function createLandscape(){
   const terrainGeo=new THREE.BufferGeometry();terrainGeo.setAttribute('position',new THREE.Float32BufferAttribute(topPositions,3));terrainGeo.setAttribute('color',new THREE.Float32BufferAttribute(topColors,3));terrainGeo.computeVertexNormals();
   mesh(terrainGeo,new THREE.MeshStandardMaterial({vertexColors:true,flatShading:true,side:THREE.DoubleSide,roughness:1})).name='Mossy hillside';
   const surfaces=[];
-  POOLS.forEach((p,index)=>{
+  activePools.forEach((p,index)=>{
     const points=Array.from({length:36},(_,j)=>{const angle=j/36*Math.PI*2;const wobble=1+.085*Math.sin(angle*3+index)+.055*Math.cos(angle*7-index);return [Math.cos(angle)*p.rx*wobble,Math.sin(angle)*p.rz*wobble];});
     const rim=polygonRing(points,[Math.min(-.46,groundY(p.z)-p.y-.4),-.2,.035,.115,.045],[1.05,1.075,1.055,1,.94],0xe8d8a7);rim.position.set(p.x,p.y,p.z);rim.name='Calcite rim '+(index+1);
     const band=polygonRing(points,[-.2,-.165],[1.076,1.08],0xf7e8bd);band.position.copy(rim.position);
@@ -77,10 +78,10 @@ export function createLandscape(){
   });
   // Thin sheets of water link consecutive pools; no expensive fluid simulation.
   const streamPoints=[];
-  POOLS.forEach((p,i)=>{
+  activePools.forEach((p,i)=>{
     streamPoints.push(new THREE.Vector3(p.x,p.y+.12,p.z));
-    if(i===POOLS.length-1)return;
-    const next=POOLS[i+1];const start=new THREE.Vector3(p.x*.65+next.x*.35,p.y+.13,p.z+p.rz*.78);
+    if(i===activePools.length-1)return;
+    const next=activePools[i+1];const start=new THREE.Vector3(p.x*.65+next.x*.35,p.y+.13,p.z+p.rz*.78);
     const end=new THREE.Vector3(next.x,next.y+.09,next.z-.2);
     streamPoints.push(start,end);
     const vertices=[];for(let k=0;k<8;k++){
