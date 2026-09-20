@@ -4,13 +4,13 @@
 
 2026-09-18 版本以手机竖屏为主要界面，提供独立地图页、68 个景点与设施、分类搜索、入口查看和可选起终点的高德步行查询。详细布局、设施来源与验证说明见 [移动端地图与设施说明](MOBILE-MAP-GUIDE.md)。
 
-在线演示：[huanglong.phrynx.chat](https://huanglong.phrynx.chat/)。已部署至 Cloudflare，支持真实高德底图和设施步行查询；访问者无需运行本机服务。部署结构、密钥配置与更新方法见 [Cloudflare 部署说明](CLOUDFLARE.md)，部署工具需要 Node.js 22+。
+在线演示：[huanglong-route.itsmephrynx.workers.dev](https://huanglong-route.itsmephrynx.workers.dev/)。已部署至 Cloudflare，支持真实高德底图和设施步行查询；访问者无需运行本机服务。部署结构、密钥配置与更新方法见 [Cloudflare 部署说明](CLOUDFLARE.md)，部署工具需要 Node.js 22+。
 
 景点扩充版采用方形卡片：320–469px 内容区每排两张，470px 起每排三张；可按彩池、瀑布、地貌、人文或已加入筛选。每处景点提供详细背景、观察细节、拍照建议和可核查来源，详见 [景点内容与资料说明](SCENIC-CONTENT-GUIDE.md)。
 
 2026-09-20 导览更新：14 处景点均增加“看哪里 / 怎么取舍 / 来前知道”。先展示看点与游览建议，景观故事按需展开；卡片时间明确为参考停留，不含到达、换观景位置与返程。五彩池区分附近定位与实际观景视角，黄龙洞说明开放未确认。详见[本轮内容设计与验证](docs/POI-VISITOR-GUIDE.md)。
 
-2026-09-20 随行连续过程版：四个独立 Three.js 场景随 POI 手动到达解锁。转动水槽打通持续水流、拖动建模 CO₂ 气团观察岩石溶解、拖水位让山体泉水出露、拖动同一滴水去下一处（或点按钮带它出发），逐池观看池沿生长—蓄水—溢流；去掉模型数字标识，加入过渡和粒子，保留四章印记与存档迁移。[直接进入随行](https://huanglong.phrynx.chat/?view=follow&v=water-anchor-20260920)。代码在 `feature/fluid-water-story`，回退标签 `archive/2026-09-20-before-water-anchor` 保留本轮前的连续过程版。见[玩法、模型与回退说明](docs/WATER-DROP-GUIDE.md)及[本轮实施记录](docs/FLUID-STORY-PLAN.md)。
+2026-09-20 随行连续过程版：四个独立 Three.js 场景随 POI 手动到达解锁。转动水槽打通持续水流、拖动建模 CO₂ 气团观察岩石溶解、拖水位让山体泉水出露、拖动同一滴水去下一处（或点按钮带它出发），逐池观看池沿生长—蓄水—溢流；去掉模型数字标识，加入过渡和粒子，保留四章印记与存档迁移。[直接进入随行](https://huanglong-route.itsmephrynx.workers.dev/?view=follow&v=water-anchor-20260920)。代码在 `feature/fluid-water-story`，回退标签 `archive/2026-09-20-before-water-anchor` 保留本轮前的连续过程版。见[玩法、模型与回退说明](docs/WATER-DROP-GUIDE.md)及[本轮实施记录](docs/FLUID-STORY-PLAN.md)。
 
 ## 打开原型
 

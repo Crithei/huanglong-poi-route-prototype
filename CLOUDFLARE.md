@@ -1,14 +1,14 @@
 # Cloudflare 部署
 
-在线地址：**https://huanglong.phrynx.chat/**
+在线地址：[huanglong-route.itsmephrynx.workers.dev](https://huanglong-route.itsmephrynx.workers.dev/)
 
-本项目部署为独立 Worker `huanglong-route`，使用账号内已有域名的 `huanglong` 子域名。静态网页和高德代理在同一域名下运行，不依赖本机预览服务。
+本项目部署为独立 Worker `huanglong-route`，使用 Cloudflare 免费 `workers.dev` 域名，`workers_dev: true`、`routes: []`。静态网页和高德代理在同一域名下运行，不依赖本机预览服务。
 
 ## 结构
 
-- `wrangler.jsonc`：Worker、静态资源目录和自定义域名。
+- `wrangler.jsonc`：Worker、静态资源目录与免费域名开关。
 - `cloudflare/worker.mjs`：公开运行配置和高德代理。
-- `scripts/build-cloudflare.cjs`：只复制白名单内的 12 个公开文件，生成 `dist/`。源码、测试、部署配置和本机凭据不进入公开资源目录。
+- `scripts/build-cloudflare.cjs`：只复制白名单内的 21 个公开文件，生成 `dist/`。源码、测试、部署配置和本机凭据不进入公开资源目录。
 - `map.js`：在线版使用 `amapServiceHost`；本机 `server.js` 仍支持原开发配置。
 
 网页从 `/runtime-config.js` 获取公开的 JSAPI Key 和同源代理地址。安全密钥只保存在 Worker Secrets 中。`/_AMapService/v4/map/styles` 转发至 `webapi.amap.com`，其余支持的高德 API 路径转发至 `restapi.amap.com`。
@@ -25,7 +25,7 @@ npm.cmd test
 npm.cmd run deploy:cloudflare
 ```
 
-首次在其他账号部署时，修改 `account_id`、Worker 名和自定义域名，并通过 Cloudflare 控制台或 `wrangler secret bulk` 设置：
+首次在其他账号部署时，修改 `account_id` 和 Worker 名，保留空 `routes`，使用该账号的 Workers 免费子域名，并通过 Cloudflare 控制台或 `wrangler secret bulk` 设置：
 
 | Secret | 用途 |
 |---|---|
@@ -44,12 +44,20 @@ npm.cmd run deploy:cloudflare
 
 飞书的实际容器权限可能与普通浏览器不同；本地嵌套 iframe 检查不能替代对飞书实际页面的验收。若嵌入加载受限，文档中的在线链接仍可独立使用。
 
-本次验证：16 项自动检查通过；线上 390px 竖屏浏览器可拖动、缩放、检索 68 处 POI 并打开设施详情。游客中心至洗身洞医疗点查询获得约 1.1 公里、15 分钟的实际步行结果。普通和无同源权限的嵌套 iframe 均获得真实地图及步行结果；后者出现 SDK 窗口访问报错与统计请求失败，测试中的地图与查询仍可用。飞书内容写入后已回读核对，但未通过用户实际登录页面验收其容器显示。
+2026-09-18 原域名版本的历史验证：16 项自动检查通过；线上 390px 竖屏浏览器可拖动、缩放、检索 68 处 POI 并打开设施详情。游客中心至洗身洞医疗点查询获得约 1.1 公里、15 分钟的实际步行结果。普通和无同源权限的嵌套 iframe 均获得真实地图及步行结果；后者出现 SDK 窗口访问报错与统计请求失败，测试中的地图与查询仍可用。飞书内容写入后已回读核对，但未通过用户实际登录页面验收其容器显示。
 
 ## 已知边界
 
 景区游线总里程、时间预算及索道条件仍属于原型估算；蓝色设施步行路线来自高德实时查询，虚线为游线顺序示意。设施开放状态、排队信息和用户定位尚未接入。Cloudflare 配置不会改变这些产品边界。
 
-默认 `workers.dev` 地址在本次本机网络检查中出现异常 DNS 解析及连接超时，因此使用已验证能够访问的自定义域名作为分享入口。
+2026-09-20 起，按用户要求将免费 `workers.dev` 地址作为唯一项目入口，停止使用私人域名。原型页面、静态资源、高德同源代理继续由同一个 Worker 提供。
+
+本次网络实测：默认 DNS 解析异常，首页与脚本直接请求超时；从另一 DNS 服务取得 Cloudflare IP 后，HTTPS 连接仍被重置。控制面可以访问且确认 workers.dev 已启用。这能核验部署配置，不能证明当前本机网络或其他访客网络可以正常打开网站。未修改系统 DNS、代理或其他网络设置。
+
+浏览器存储按域名隔离，新入口不会自动继承旧域名下的手动打卡与印章。网站代码更新不会清除存储，域名切换需要在新入口重新记录。
+
+回退代码时也要保留 `workers_dev: true`、`routes: []`；历史标签中的配置可能带有旧私人域名，不能未经修改直接部署。Wrangler 配置中清空 routes 可能不会移除已经存在的自定义域名，解绑后还需通过 Cloudflare Domains API/控制台检查实际绑定。
+
+本轮部署版本、域名解绑与飞书入口回读结果待发布后补齐。
 
 参考：[Cloudflare 静态资源](https://developers.cloudflare.com/workers/static-assets/)、[自定义域名](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/)、[高德安全密钥](https://lbs.amap.com/api/javascript-api-v2/guide/abc/jscode)。
