@@ -90,7 +90,7 @@ Cloudflare 只发布 21 个白名单文件，测试、研究、源码和凭据�
 
 浏览器自动化接口在本轮返回 `unsupported Codex auth method: apikey`，因此尚未完成实时 WebGL、完整竖屏页面、飞书容器与真机触控验收。DOM 测试和离线预览不能替代这些检查。
 
-发布记录待最终构建与线上回读后填写。
+已发布：[连续过程版随行](https://huanglong.phrynx.chat/?view=follow&v=fluid-story-20260920)。Cloudflare 版本 `22fa0e3b-eef1-4d51-a0a3-0336647b87bd`，实现提交 `2daf6bb`。页面、状态脚本、交互脚本、样式、Three.js 包与四份 GLB 共 9 个关键文件回读均为 HTTP 200，SHA-256 与本地构建一致。GitHub 实验分支和本轮前的回退标签已核对。
 
 ## Git 回退
 
