@@ -93,7 +93,9 @@ Cloudflare 只发布 21 个白名单文件，测试、研究、源码和凭据�
 
 上一轮发布：[连续过程版随行](https://huanglong.phrynx.chat/?view=follow&v=fluid-story-20260920)。Cloudflare 版本 `22fa0e3b-eef1-4d51-a0a3-0336647b87bd`，实现提交 `2daf6bb`。页面、状态脚本、交互脚本、样式、Three.js 包与四份 GLB 共 9 个关键文件回读均为 HTTP 200，SHA-256 与本地构建一致。GitHub 实验分支和本轮前的回退标签已核对。
 
-形象锚点版验证与发布记录将在最终产物核对后追加。
+形象锚点版：66 项全量测试通过，最终交互修改后 19 项 DOM/renderer 回归再次通过，构建成功。离线检查了真实气团、水滴及逐池定位；独立审查后修复离屏时两层拖放状态不同步的边界情况。
+
+新版：[气团与水滴随行](https://huanglong.phrynx.chat/?view=follow&v=water-anchor-20260920)。实现提交 `7ae0934`；Cloudflare 版本 `ea866c5b-7b6f-4ad0-bfbd-f78e7e053f65`。9 个关键资源 HTTP 200，SHA-256 与本地构建一致。GitHub 分支及 `before-water-anchor` 回退标签已同步。浏览器工具仍无法认证，未宣称完成实际 WebGL/手机触控验收。
 
 ## Git 回退
 
