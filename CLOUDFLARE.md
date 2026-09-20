@@ -58,6 +58,10 @@ npm.cmd run deploy:cloudflare
 
 回退代码时也要保留 `workers_dev: true`、`routes: []`；历史标签中的配置可能带有旧私人域名，不能未经修改直接部署。Wrangler 配置中清空 routes 可能不会移除已经存在的自定义域名，解绑后还需通过 Cloudflare Domains API/控制台检查实际绑定。
 
-本轮部署版本、域名解绑与飞书入口回读结果待发布后补齐。
+2026-09-20 切换部署：`49af2a0f-2cba-4ca9-adb0-cb8ba96e6e39`（实现提交 `ea88b64`）。8 项 Worker 测试通过，构建白名单为 21 个资源，部署复用未变更的静态资源并保留高德 Secrets。
+
+Cloudflare API 回读确认 `workers.dev enabled: true`、`customDomains: []`。旧地址已不再提供原型页面（本次请求 HTTP 530）；其他 Worker 和账号域名未修改。本次没有完成新域名公开 HTTPS、地图与浏览器验收，具体网络失败见上文。
+
+飞书文档「tjh-游客画像出行决策」版本 26 → 28，iframe、备用打开链接、正文在线链接共 3 处已改为新地址。回读确认旧地址引用为 0，HTML 除域名外字节一致，研究内容、表格和标题保留。此为内容/API 核验，不代表飞书容器已能访问新域名。
 
 参考：[Cloudflare 静态资源](https://developers.cloudflare.com/workers/static-assets/)、[自定义域名](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/)、[高德安全密钥](https://lbs.amap.com/api/javascript-api-v2/guide/abc/jscode)。
