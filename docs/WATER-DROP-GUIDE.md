@@ -77,6 +77,8 @@ npm.cmd run deploy:cloudflare
 
 本轮浏览器自动化接口返回认证错误，未完成实时 WebGL、竖屏整页截图、飞书容器和真机触控验收。DOM 事件测试及离线模型预览不能替代这些检查。
 
+线上已部署至 [四章随行预览](https://huanglong.phrynx.chat/?view=follow&v=poi-chapters-20260920)，Cloudflare 版本 `3a0be7fa-c2b6-45a8-9113-030608e7036c`，实现提交 `7cbcce6`。页面、状态脚本、交互脚本、样式、Three.js 包和四份 GLB 共 9 个关键文件，回读均为 HTTP 200、SHA-256 与本地相同。GitHub 实验分支和前一版回退标签已核对。
+
 ## Git 回退
 
 实验分支 `feature/poi-water-chapters`；前一版标签 `archive/2026-09-20-before-poi-chapters`，对应 `02204d1`。更早稳定 main 仍保留。
