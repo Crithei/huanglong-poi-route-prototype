@@ -1153,6 +1153,68 @@ textarea::placeholder,
   min-height: 180px;
 }
 
+.planning-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: center;
+  margin: 0 58px 24px;
+  padding: 20px 22px;
+  border: 1px solid #d7e5d7;
+  border-radius: 6px;
+  background: #eef6ed;
+}
+
+.planning-summary-copy h2 { margin: 4px 0 7px; color: var(--pine-deep); font-size: 22px; }
+.planning-summary-copy p:last-child { max-width: 620px; margin: 0; color: #60766a; font-size: 12px; line-height: 1.65; }
+.planning-summary-stats { display: grid; grid-template-columns: repeat(4, minmax(60px, 1fr)); gap: 14px; }
+.planning-stat { display: grid; gap: 2px; min-width: 62px; }
+.planning-stat strong { color: var(--pine); font-family: var(--display); font-size: 22px; }
+.planning-stat small { color: #6f8374; font-size: 10px; white-space: nowrap; }
+
+.route-planning-note {
+  margin: 0 58px 56px;
+  padding: 17px 19px;
+  border-left: 3px solid #9fb58b;
+  background: #f0f6ed;
+  color: #55705d;
+}
+.route-planning-note-heading { display: flex; align-items: center; gap: 8px; color: var(--pine); font-size: 12px; }
+.route-planning-note-heading svg { width: 16px; color: #79986d; }
+.route-planning-note p { margin: 8px 0 4px; font-size: 12px; line-height: 1.6; }
+.route-planning-note small { color: #75877b; font-size: 10px; line-height: 1.5; }
+.planning-badge { margin-left: auto; padding: 3px 6px; border: 1px solid #c4d3b7; border-radius: 3px; color: #68805d; font-size: 9px; font-weight: 800; }
+
+.planning-layer-panel {
+  position: absolute;
+  top: 207px;
+  left: 12px;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  gap: 6px 9px;
+  align-items: center;
+  max-width: calc(100% - 24px);
+  padding: 8px 10px;
+  border: 1px solid rgba(137, 165, 139, .38);
+  border-radius: 6px;
+  color: #476452;
+  background: rgba(249, 253, 247, .92);
+  box-shadow: 0 3px 12px rgba(32, 73, 45, .1);
+  font-size: 10px;
+}
+.planning-layer-heading { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; }
+.planning-layer-heading span { padding: 2px 5px; border-radius: 3px; color: #7c906f; background: #e7f0df; font-size: 9px; }
+.planning-layer-panel label { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; cursor: pointer; }
+.planning-layer-panel input { width: 14px; height: 14px; accent-color: #5c9679; }
+.planning-layer-panel small { grid-column: 1 / -1; color: #7d8c80; font-size: 9px; }
+
+.planning-marker { position: relative; display: grid; place-items: center; width: 36px; height: 36px; border: 2px solid rgba(255,255,255,.95); border-radius: 50%; color: #355f4e; background: #e0edc5; box-shadow: 0 2px 8px rgba(30, 71, 48, .25); }
+.planning-marker.facility { color: #405d72; background: #d5e2ee; }
+.planning-marker.resource { color: #805f36; background: #f1dfae; }
+.planning-marker span { font-size: 11px; font-weight: 800; }
+.planning-marker small { position: absolute; top: 38px; left: 50%; transform: translateX(-50%); max-width: 130px; padding: 2px 4px; border-radius: 3px; color: #53685a; background: rgba(255,255,255,.88); font-size: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+
 .mini-heading {
   align-items: start;
   padding-bottom: 14px;

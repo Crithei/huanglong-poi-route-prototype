@@ -216,6 +216,7 @@ const appState = {
   preferences: {
     hours: 6,
     pace: "平衡",
+    mode: "观光核心",
     cableCar: false,
     shortageMinutes: 0,
   },
@@ -234,6 +235,7 @@ const mapRuntime = {
   walking: null,
   latestPlan: null,
   hasFailed: false,
+  planning: { zoneCircles: [], routeLines: [], facilityMarkers: [], resourceMarkers: [] },
 };
 
 const sampleText = "黄龙这次想去五彩池、争艳彩池和莲台飞瀑；如果时间够，也想在黄龙古寺停留。";
@@ -244,6 +246,30 @@ function getPoi(id) {
 
 function selectedPois() {
   return POIS.filter((poi) => appState.selectedPoiIds.has(poi.id));
+}
+
+function planningData() {
+  return window.HUANGLONG_PLANNING || null;
+}
+
+function planningAreaForPoi(poi) {
+  const planning = planningData();
+  if (!planning?.areas?.length || !poi) return null;
+  if (poi.planningAreaId) return planning.areas.find((area) => area.id === poi.planningAreaId) || null;
+  const areaText = String(poi.area || "");
+  const byText = planning.areas.find((area) => area.shortName && areaText.includes(area.shortName));
+  if (byText) return byText;
+  // The current curated catalogue is the Huanglong-gou visitor route.
+  if (poi.location && planning.areas.some((area) => area.id === "huanglong-gou")) return planning.areas.find((area) => area.id === "huanglong-gou");
+  return null;
+}
+
+function planningModeBonus(poi, mode) {
+  const text = `${poi.category || ""} ${poi.collection || ""} ${poi.description || ""}`;
+  if (mode === "科普研学") return /水|瀑布|地貌|钙华|洞|湿地|冰川/.test(text) ? 1.8 : 0;
+  if (mode === "摄影") return /彩池|瀑布|水面|倒影|云海|观景/.test(text) ? 2 : 0;
+  if (mode === "低负担") return -(poi.effort || 0) * 1.8;
+  return poi.routeRole === "spine" ? 1 : 0;
 }
 
 function effortLabel(effort) {
@@ -294,9 +320,11 @@ function routeKilometers(pois, preferences) {
 }
 
 function adjustedRank(poi, preferences) {
-  if (preferences.pace === "轻松") return poi.rank - poi.effort * 1.5;
-  if (preferences.pace === "深度") return poi.rank + poi.effort * 0.35;
-  return poi.rank;
+  const mode = preferences.mode || "观光核心";
+  const modeBonus = planningModeBonus(poi, mode);
+  if (preferences.pace === "轻松") return poi.rank - poi.effort * 1.5 + modeBonus;
+  if (preferences.pace === "深度") return poi.rank + poi.effort * 0.35 - modeBonus * 0.35;
+  return poi.rank - modeBonus;
 }
 
 function buildPlan(selectedIds, preferences, completedIds) {
@@ -327,7 +355,13 @@ function buildPlan(selectedIds, preferences, completedIds) {
     reason = "已按更短的可用时间重排后半程，当前保留的节点都能放进新的时间窗口。";
   } else if (preferences.cableCar) {
     reason = "已将索道上行作为原型估算条件，实际班次和开放状态需接景区服务确认。";
+  } else if ((preferences.mode || "观光核心") !== "观光核心") {
+    reason = `已按“${preferences.mode}”优先保留节点；路线仍需结合现场栈道、开放状态与体力调整。`;
   }
+
+  const planning = planningData();
+  const planningAreas = [...new Set(included.map(planningAreaForPoi).filter(Boolean))];
+  const capacityArea = planningAreas[0];
 
   return {
     included,
@@ -337,6 +371,12 @@ function buildPlan(selectedIds, preferences, completedIds) {
     kilometers: routeKilometers(included, preferences),
     buffer: remainingBuffer,
     reason,
+    planning: {
+      areas: planningAreas,
+      capacity: capacityArea ? { name: capacityArea.shortName, daily: capacityArea.capacity, limit: capacityArea.limit } : null,
+      routeMode: preferences.mode || "观光核心",
+      sourceStatus: planning?.source?.status || "规划资料仅作示意，现场信息需核实",
+    },
   };
 }
 
@@ -366,6 +406,7 @@ function renderDiscover() {
   document.querySelector('#discoverFilters').innerHTML=SCENIC_FILTERS.map(([id,label])=>`<button type="button" data-scenic-filter="${id}" class="${appState.discoverCategory===id?'active':''}" aria-pressed="${appState.discoverCategory===id}">${label}</button>`).join('');
   const scenic=filteredScenicPois();
   document.querySelector('#discoverResultCount').textContent=`${scenic.length} 处景点 · 点卡片看介绍，点 + 加入行程`;
+  renderPlanningSummary();
   poiGrid.innerHTML = scenic.map((poi) => {
     const isSelected = appState.selectedPoiIds.has(poi.id);
     return `
@@ -379,6 +420,19 @@ function renderDiscover() {
         <button class="poi-select ${isSelected ? "selected" : ""}" type="button" data-poi-id="${poi.id}" aria-label="${isSelected?'移出':'加入'}${html(poi.name)}${isSelected?'行程':'到行程'}" aria-pressed="${isSelected}"><i data-lucide="${isSelected?'check':'plus'}" aria-hidden="true"></i></button>
       </article>`;
   }).join("") || '<div class="discover-empty"><strong>暂时没有匹配的景点</strong><p>试试别名，或回到全部景点继续挑选。</p><button type="button" data-reset-discover>查看全部景点</button></div>';
+}
+
+function renderPlanningSummary() {
+  const target = document.querySelector("#planningSummaryStats");
+  const planning = planningData();
+  if (!target || !planning) return;
+  const summary = planning.summary || {};
+  target.innerHTML = [
+    [summary.scenicResourceCount, "规划景源"],
+    [planning.areas?.length || 0, "景区"],
+    [summary.visitorCenters, "游客中心"],
+    [summary.emergencyShelters, "应急相关点"],
+  ].map(([value, label]) => `<span class="planning-stat"><strong>${html(value)}</strong><small>${html(label)}</small></span>`).join("");
 }
 
 function renderCandidates() {
@@ -445,6 +499,13 @@ function renderRoute() {
       <button class="deferred-item" type="button" data-poi-detail-id="${poi.id}"><strong>${poi.name}</strong><span>未纳入原因：当前时间预算优先保留更高优先级的已选 POI。</span></button>`).join("")
     : '<p class="empty-deferred">当前选择可以完整放进这段时间。</p>';
 
+  const note = document.querySelector("#routePlanningNote");
+  if (note) {
+    const capacity = plan.planning?.capacity;
+    const areaNames = plan.planning?.areas?.map((area) => area.shortName).join("、") || "当前景区";
+    note.innerHTML = `<div class="route-planning-note-heading"><i data-lucide="layers-3" aria-hidden="true"></i><strong>规划依据 · ${html(plan.planning?.routeMode || "观光核心")}</strong><span class="planning-badge">规划示意</span></div><p>本次路线覆盖 ${html(areaNames)}。${capacity ? `规划日游客容量约 ${html(capacity.daily)} 人，日极限容量约 ${html(capacity.limit)} 人。` : "当前没有匹配到规划容量。"}</p><small>${html(plan.planning?.sourceStatus || "规划资料仅用于数字导览与方案表达")}；不代表实时客流、开放状态或现场导航。</small>`;
+  }
+
   renderMap(plan);
   syncPreferenceControls();
 }
@@ -455,6 +516,9 @@ function syncPreferenceControls() {
   });
   document.querySelectorAll("[data-pace]").forEach((button) => {
     button.classList.toggle("selected", button.dataset.pace === appState.preferences.pace);
+  });
+  document.querySelectorAll("[data-route-mode]").forEach((button) => {
+    button.classList.toggle("selected", button.dataset.routeMode === (appState.preferences.mode || "观光核心"));
   });
   document.querySelector("#cableCar").checked = appState.preferences.cableCar;
 }
@@ -632,6 +696,14 @@ function bindEvents() {
   document.querySelectorAll("[data-pace]").forEach((button) => {
     button.addEventListener("click", () => {
       appState.preferences.pace = button.dataset.pace;
+      clearShortageMode();
+      renderAll();
+    });
+  });
+
+  document.querySelectorAll("[data-route-mode]").forEach((button) => {
+    button.addEventListener("click", () => {
+      appState.preferences.mode = button.dataset.routeMode;
       clearShortageMode();
       renderAll();
     });

@@ -18,6 +18,7 @@
     <script defer src="assets/lucide-0.468.0.min.js"></script>
     <script defer src="data/facilities.js"></script>
     <script defer src="data/scenic.js"></script>
+    <script defer src="data/planning.js"></script>
     <script defer src="map.js"></script>
     <script defer src="follow-state.js"></script>
     <script defer src="assets/water-scene.js"></script>
@@ -76,6 +77,14 @@
             <div class="discover-filters" id="discoverFilters" role="group" aria-label="按景观类型筛选"></div>
             <p class="discover-result-count" id="discoverResultCount" role="status"></p>
           </div>
+          <section class="planning-summary" aria-label="黄龙规划资料摘要">
+            <div class="planning-summary-copy">
+              <p class="eyebrow dark">PLANNING LENS / 2021—2035</p>
+              <h2>把总规里的黄龙，放进今天的选择。</h2>
+              <p>景源、分区、容量与设施来自规划资料，用于组织游线和内容表达；不代表当天开放、实时客流或现场导航。</p>
+            </div>
+            <div class="planning-summary-stats" id="planningSummaryStats" aria-label="规划资料统计"></div>
+          </section>
           <div class="poi-grid" id="poiGrid"></div>
 
           <section class="infrastructure-strip" aria-label="查找沿途设施">
@@ -182,6 +191,14 @@
             <button id="toggleMapPitch" type="button" aria-label="切换地图倾斜视角">3D</button>
           </div>
           <div class="map-legend"><span class="legend-line"></span>游线示意<span class="legend-line walking"></span>高德步行</div>
+          <section class="planning-layer-panel" id="planningLayerPanel" aria-label="规划图层">
+            <div class="planning-layer-heading"><strong>规划视角</strong><span>示意</span></div>
+            <label><input type="checkbox" data-planning-layer="zones" checked /> <span>分区</span></label>
+            <label><input type="checkbox" data-planning-layer="routes" checked /> <span>游线</span></label>
+            <label><input type="checkbox" data-planning-layer="facilities" /> <span>设施</span></label>
+            <label><input type="checkbox" data-planning-layer="resources" /> <span>景源</span></label>
+            <small>虚线与浅色图层来自总规资料，仅作示意。</small>
+          </section>
           <aside class="place-sheet" id="placeSheet" data-size="peek" aria-label="地点列表与步行规划">
             <button class="sheet-grip" id="togglePlaceSheet" type="button" aria-expanded="false" aria-label="展开地点列表"><span></span></button>
             <div class="sheet-heading"><div><h2 id="mapResultTitle">彩池与山林之间</h2><p id="mapResultCount"></p></div><button class="sheet-size-button" id="collapsePlaceSheet" type="button" aria-label="收起地点卡片"><i data-lucide="chevron-down" aria-hidden="true"></i></button></div>
@@ -231,6 +248,15 @@
                 <button type="button" data-pace="深度">深度</button>
               </div>
             </div>
+            <div class="preference-group preference-group-mode">
+              <span class="field-label">这次想怎么走</span>
+              <div class="segmented-control" id="routeModeControl" role="group" aria-label="路线模式">
+                <button type="button" data-route-mode="观光核心">观光核心</button>
+                <button type="button" data-route-mode="科普研学">科普研学</button>
+                <button type="button" data-route-mode="摄影">摄影</button>
+                <button type="button" data-route-mode="低负担">低负担</button>
+              </div>
+            </div>
             <label class="toggle-line" for="cableCar">
               <span><i data-lucide="tram-front" aria-hidden="true"></i>考虑索道上行</span>
               <input id="cableCar" type="checkbox" />
@@ -272,6 +298,7 @@
               <div id="deferredList" class="deferred-list"></div>
             </div>
           </section>
+          <section class="route-planning-note" id="routePlanningNote" aria-label="路线规划依据"></section>
         </section>
 
         <section class="view" id="follow-view" data-view-panel="follow" aria-labelledby="follow-title" hidden>

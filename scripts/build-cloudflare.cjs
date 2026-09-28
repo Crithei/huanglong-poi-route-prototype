@@ -4,7 +4,7 @@ const root = path.resolve(__dirname, '..');
 const output = path.join(root, 'dist');
 const files = [
   'index.html', 'app.js', 'map.js', 'style.css', 'mobile.css',
-  'data/facilities.js', 'data/scenic.js', 'assets/favicon.svg', 'assets/lucide-0.468.0.min.js',
+  'data/facilities.js', 'data/scenic.js', 'data/planning.js', 'assets/favicon.svg', 'assets/lucide-0.468.0.min.js',
   'assets/LUCIDE-LICENSE', 'assets/huanglong-five-colored-pond.jpg',
   'assets/huanglong-welcome-ponds.jpg',
   'follow.js', 'follow-state.js', 'follow.css', 'assets/water-scene.js',

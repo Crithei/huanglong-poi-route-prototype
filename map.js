@@ -4,6 +4,7 @@ const MAP_CATEGORIES = [
   ['transport','索道接驳','tram-front'], ['shop','商店补给','store'], ['medical','医疗','cross'], ['service','便民','info']
 ];
 const mapUi = { category:'scenic', query:'', selectedId:'welcome-pond', size:'peek', originId:'visitor-center', requestId:0, catalog:null, routeResult:null, routeLine:null, routeEnds:[], entranceMarker:null, markerSignature:'', busy:false };
+const planningUi = { zones:true, routes:true, facilities:false, resources:false };
 const html = value => String(value ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 function getMapPois() {
@@ -161,13 +162,62 @@ function createMapMarkerContent(poi,selected) {
   return `<div class="map-pin-wrap ${picked?'picked':''}"><button class="amap-poi-marker ${group} ${selected?'selected':''}" type="button" aria-label="${html(poi.name)}">${glyph}</button>${picked?`<span class="map-pin-label">${html(poi.name)}</span>`:''}</div>`;
 }
 
+function clearPlanningLayer(name) {
+  const items = mapRuntime.planning?.[name] || [];
+  items.forEach((item) => item.setMap?.(null));
+  if (mapRuntime.planning) mapRuntime.planning[name] = [];
+}
+
+function createPlanningMarkerContent(item, kind) {
+  const glyph = kind === 'resource' ? '源' : item.type === '应急设施' ? '急' : item.type === '导览设施' ? '解' : '中';
+  return `<div class="planning-marker ${kind}"><span>${glyph}</span><small>${html(item.name)}</small></div>`;
+}
+
+function renderPlanningLayers() {
+  if (!mapRuntime.map || !mapRuntime.AMap || !window.HUANGLONG_PLANNING || !mapRuntime.planning) return;
+  const { AMap, map } = mapRuntime;
+  const planning = window.HUANGLONG_PLANNING;
+  clearPlanningLayer('zoneCircles');
+  clearPlanningLayer('routeLines');
+  clearPlanningLayer('facilityMarkers');
+  clearPlanningLayer('resourceMarkers');
+  if (planningUi.zones) {
+    mapRuntime.planning.zoneCircles = (planning.zones || []).map((zone) => {
+      const circle = new AMap.Circle({ center: zone.center, radius: zone.radius, strokeColor: zone.color, strokeWeight: 1.5, strokeOpacity: .55, strokeStyle: 'dashed', fillColor: zone.color, fillOpacity: zone.opacity, zIndex: 20, bubble: true, extData: { planning: true, name: zone.name } });
+      circle.setMap(map);
+      return circle;
+    });
+  }
+  if (planningUi.routes) {
+    mapRuntime.planning.routeLines = (planning.routes || []).map((route) => {
+      const line = new AMap.Polyline({ path: route.points, strokeColor: '#9aa77a', strokeWeight: 3, strokeOpacity: .62, strokeStyle: 'dashed', strokeDasharray: [7, 8], zIndex: 30, bubble: true, extData: { planning: true, name: route.name } });
+      line.setMap(map);
+      return line;
+    });
+  }
+  if (planningUi.facilities) {
+    mapRuntime.planning.facilityMarkers = (planning.facilities || []).filter((item) => item.location).map((item) => {
+      const marker = new AMap.Marker({ position: item.location, content: createPlanningMarkerContent(item, 'facility'), offset: new AMap.Pixel(-18, -18), title: `${item.name} · 规划示意`, zIndex: 55, bubble: true });
+      marker.setMap(map);
+      return marker;
+    });
+  }
+  if (planningUi.resources) {
+    mapRuntime.planning.resourceMarkers = (planning.resources || []).filter((item) => item.location).map((item) => {
+      const marker = new AMap.Marker({ position: item.location, content: createPlanningMarkerContent(item, 'resource'), offset: new AMap.Pixel(-18, -18), title: `${item.name} · 规划景源示意`, zIndex: 50, bubble: true });
+      marker.setMap(map);
+      return marker;
+    });
+  }
+}
+
 function syncAmapPlan(plan) {
   if(!mapRuntime.map||!mapRuntime.AMap||!plan||appState.activeView!=='map') return;
   const {AMap,map}=mapRuntime;
   const includedIds=new Set(plan.included.map(p=>p.id));
   const walkingVisible=!document.querySelector('#walkingPanel').hidden;
   const pois=walkingVisible?[getPoi(document.querySelector('#walkOrigin').value),getPoi(document.querySelector('#walkDestination').value)].filter(Boolean):filteredMapPois();
-  const signature=JSON.stringify([pois.map(p=>p.id),[...includedIds],mapUi.selectedId]);
+  const signature=JSON.stringify([pois.map(p=>p.id),[...includedIds],mapUi.selectedId,planningUi]);
   if(signature!==mapUi.markerSignature) {
     mapRuntime.markers.forEach(marker=>marker.setMap(null));
     mapRuntime.markers=pois.map(p=>{
@@ -185,6 +235,7 @@ function syncAmapPlan(plan) {
     mapRuntime.scenicSpine=new AMap.Polyline({path:scenicPath,strokeColor:'#4b877b',strokeWeight:4,strokeOpacity:.7,strokeStyle:'dashed',strokeDasharray:[8,7],zIndex:70});
     mapRuntime.scenicSpine.setMap(map);
   }
+  renderPlanningLayers();
   if(mapUi.routeResult&&!mapUi.routeLine)drawWalkingRoute(false);
 }
 
@@ -437,6 +488,10 @@ function bindMapEvents() {
     mapRuntime.map.setPitch(tilted?0:40);event.currentTarget.classList.toggle('active',!tilted);
   });
   document.querySelector('#retryMap').addEventListener('click',()=>{mapRuntime.hasFailed=false;ensureAmap();});
+  document.querySelectorAll('[data-planning-layer]').forEach((input)=>input.addEventListener('change',()=>{
+    planningUi[input.dataset.planningLayer]=input.checked;
+    renderPlanningLayers();
+  }));
   document.querySelector('#closeWalking').addEventListener('click',()=>{closeWalkingPanel();setSheetSize('peek');});
   for(const id of ['walkOrigin','walkDestination'])document.querySelector('#'+id).addEventListener('change',()=>{
     invalidateWalking();document.querySelector('#walkingSteps').replaceChildren();
