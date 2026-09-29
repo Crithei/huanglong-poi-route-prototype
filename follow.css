@@ -144,3 +144,12 @@
 [data-render-state="fallback"]:has(.water-drop-interaction:not([hidden])) .fallback-ponds { visibility:hidden; }
 [data-render-state="fallback"]:has(.water-drop-interaction:not([hidden])) .water-fallback p { margin-top:180px; }
 @media(prefers-reduced-motion:reduce) { .water-drop-next-target { transition:none; } }
+
+/* The feedback line carries the causal bridge between a gesture and the model. */
+.water-story #waterStageCopy { transition:color .25s ease, opacity .25s ease; }
+.water-feedback { min-height:42px; padding:10px 12px; border-left:2px solid transparent; border-radius:0 8px 8px 0; transition:background .2s ease, border-color .2s ease, color .2s ease; }
+.water-feedback[data-state="hint"] { background:#f1f3e3; border-color:#b2bd89; color:#65754f; }
+.water-feedback[data-state="process"] { background:#edf3e9; border-color:#82ab8d; color:#4d765d; }
+.water-feedback[data-state="complete"] { background:#f1ebcf; border-color:#b8954b; color:#6e5b32; }
+.water-feedback[data-state="locked"] { background:#f5f5ed; border-color:#d4dacd; color:#879180; }
+@media(prefers-reduced-motion:reduce) { .water-story #waterStageCopy,.water-feedback { transition:none; } }

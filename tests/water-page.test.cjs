@@ -151,6 +151,42 @@ test('keyboard pool action runs one cycle and reloading preserves travel before 
   }finally{p.dom.window.close();}
 });
 
+test('each chapter gives a first-use hint and explains the cause after the action',async()=>{
+  const cases=[
+    {id:'flow',action:()=>{},hint:/转动水槽/,after:/水路接通|径流/},
+    {id:'dissolution',action:p=>p.click('[data-game-action="charge"]'),hint:/CO₂|气团/,after:/带上了 CO₂|石灰岩/},
+    {id:'emergence',action:p=>p.slider('#groundwaterLevel',70),hint:/水位|出口/,after:/出露高度|泉水/},
+    {id:'deposition',action:p=>p.click('#waterAction'),hint:/水滴|下一处/,after:/池沿|蓄水|溢流/},
+  ];
+  for(const item of cases){
+    const p=await page();
+    try{
+      p.arrive(item.id);
+      assert.match(p.$('#waterGameFeedback').textContent,item.hint,item.id+' should show a first-use hint');
+      item.action(p);
+      assert.match(p.$('#waterGameFeedback').textContent,item.after,item.id+' should explain the immediate cause');
+    }finally{p.dom.window.close();}
+  }
+});
+
+test('deposition feedback names each visible phase and chapter completion keeps its POI connection',async()=>{
+  const p=await page();
+  try{
+    p.arrive('deposition');
+    p.click('#waterAction');
+    assert.match(p.$('#waterGameFeedback').textContent,/前往|下一片/);
+    p.advance('deposition',.8);
+    assert.match(p.$('#waterGameFeedback').textContent,/池沿|生长/);
+    p.advance('deposition',3.2);
+    assert.match(p.$('#waterGameFeedback').textContent,/蓄水|水面/);
+    p.advance('deposition',3.2);
+    assert.match(p.$('#waterGameFeedback').textContent,/溢流|越过/);
+    p.advance('deposition',3.2);
+    assert.match(p.$('#waterGameFeedback').textContent,/五彩池|彩池营造者/);
+    assert.match(p.$('#waterStageCopy').textContent,/五彩池|沉积/);
+  }finally{p.dom.window.close();}
+});
+
 test('switching chapter, pausing, context loss or leaving page cancels unfinished drags',async()=>{
   for(const trigger of ['switch','pause','contextlost','pagehide']){
     const p=await page();
