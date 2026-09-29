@@ -31,3 +31,12 @@ test('stamp catalogue provides a graceful generic design for the remaining sceni
   assert.equal(stamps.default.motif, 'default');
   assert.ok(stamps.default.motto.length >= 4);
 });
+
+test('Five-color Pond and Flying Waterfall use the landmark emblem composition', () => {
+  const stamps = load();
+  for (const [id, landmark] of [['five-color-pond', 'terraced-pools'], ['flying-waterfall', 'split-waterfall']]) {
+    assert.equal(stamps[id].layout, 'landmark-emblem', `${id} should use the new landmark composition`);
+    assert.equal(stamps[id].scene, landmark);
+    assert.ok(stamps[id].caption.length >= 4);
+  }
+});
