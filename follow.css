@@ -83,6 +83,12 @@
 .water-game-progress { display:flex; flex-wrap:wrap; gap:6px 10px; justify-content:space-between; margin:12px 23px 0; font-size:9px; color:#71845e; }
 .water-feedback { margin:12px 23px 14px; min-height:34px; font-size:11px; line-height:1.8; color:#637c59; }
 .chapter-reward-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin:14px 0; }.chapter-reward { text-align:center; border:1px dashed #c8d0b8; padding:12px 4px; border-radius:12px; opacity:.52; background:#f2f2e6; }.chapter-reward.earned { opacity:1; background:#e9edcf; border-style:solid; border-color:#b7bd89; }.chapter-reward svg { width:24px; height:24px; margin:0 auto 7px; }.chapter-reward strong,.chapter-reward small { display:block; }.chapter-reward strong { font-size:11px; }.chapter-reward small { font-size:9px; margin-top:5px; color:#7c8e64; }.chapter-grand-badge { margin-top:10px; background:#e9e3bb; }
+.stamp-item { position:relative; padding:4px 2px 7px; border-radius:14px; transition:transform .18s ease,background .18s ease; }
+.stamp-item:hover { transform:translateY(-2px); background:#f1f1df; }
+.stamp-item strong { color:#46644f; font-weight:600; }
+.stamp-item .stamp-motto { min-height:20px; color:#75866f; line-height:1.35; }
+.stamp-item.locked strong,.stamp-item.locked .stamp-motto { color:#9da58d; }
+.stamp-item:not(.locked) .travel-stamp[data-stamp-id="five-color-pond"] { filter:drop-shadow(0 3px 4px #7d90694d); }
 .water-fallback small { max-width:260px; padding:8px 15px; line-height:1.8; }.water-canvas[data-chapter="dissolution"] .fallback-ponds span { border-radius:3px; background:#b5c7b0; transform:rotate(0); }.water-canvas[data-chapter="emergence"] .fallback-ponds span { border-radius:4px 60% 4px 30%; }.water-canvas[data-chapter="flow"] .fallback-ponds span { border-radius:30%; height:25px; }
 .water-experience button:focus-visible,.water-experience select:focus-visible,.water-experience input:focus-visible { outline:2px solid #b1893d; outline-offset:3px; }
 @container(max-width:350px) { .water-chapter-grid { margin-inline:14px; gap:7px; }.chapter-card { padding:10px; }.chapter-card strong { font-size:17px; }.water-canvas { height:330px; }.water-scene-label,.water-scene-state { left:17px; }.water-unlock { margin-inline:15px; padding:12px; }.water-game-controls { margin-inline:15px; padding-inline:8px; }.game-choice strong { font-size:11px; }.water-story h3 { font-size:21px; }.water-heading h2 { font-size:24px; } }
