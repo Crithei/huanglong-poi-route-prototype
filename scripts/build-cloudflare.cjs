@@ -8,6 +8,11 @@ const files = [
   'assets/LUCIDE-LICENSE', 'assets/huanglong-five-colored-pond.jpg',
   'assets/huanglong-welcome-ponds.jpg',
   'follow.js', 'follow-state.js', 'follow.css', 'assets/water-scene.js',
+  'data/passport.js', 'passport-state.js', 'passport-art.js', 'passport.js', 'passport.css',
+  'assets/passport/welcome-pond.svg', 'assets/passport/flying-waterfall.svg', 'assets/passport/jinsha-pudi.svg',
+  'assets/passport/bonsai-pond.svg', 'assets/passport/zhengyan-chi.svg', 'assets/passport/five-color-pond.svg',
+  'assets/passport/sticker-color.svg', 'assets/passport/sticker-flow.svg', 'assets/passport/sticker-mineral.svg',
+  'assets/passport/badge-gentle.svg', 'assets/passport/badge-wander.svg', 'assets/passport/badge-observer.svg',
   'assets/THREE-LICENSE', 'assets/models/huanglong-water-landscape.glb',
   'assets/models/huanglong-flow.glb', 'assets/models/huanglong-dissolution.glb', 'assets/models/huanglong-emergence.glb',
 ];

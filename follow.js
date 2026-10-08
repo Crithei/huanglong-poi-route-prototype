@@ -26,6 +26,7 @@ window.HuanglongFollow=(()=>{
   function current(){return context?.plan.included.find(p=>!context.state.completedPoiIds.has(p.id));}
   function announce(text){$('#journalAnnouncement').textContent=text;clearTimeout(toastTimer);toastTimer=setTimeout(()=>{$('#journalAnnouncement').textContent='';},3200);}
   function stamp(poi,earned=true){
+    if(window.HuanglongPassportData?.places.some(p=>p.id===poi?.id))return `<svg class="travel-stamp landmark-emblem ${earned?'':'stamp-locked'}" data-stamp-id="${escape(poi.id)}" viewBox="0 0 100 100" role="img" aria-label="${escape(poi.name)}纪念章"><image href="assets/passport/${escape(poi.id)}.svg" width="100" height="100"/></svg>`;
     const catalog=window.HUANGLONG_STAMPS||{};
     const design=catalog[poi?.id]||catalog.default||{title:poi?.name||'黄龙一见',motto:'山水相逢 · 留下一枚印记',color:'#4e8068',accent:'#c3d47d',motif:'default'};
     const color=earned?design.color:'#899483', accent=earned?design.accent:'#c6cdbf', motif=design.motif;
@@ -242,6 +243,12 @@ window.HuanglongFollow=(()=>{
     $('#followRouteStrip').innerHTML=plan.included.map(p=>`<button type="button" class="journal-stop" data-poi-detail-id="${escape(p.id)}"><span class="mini-stamp">${stamp(p,!!journal.stamps[p.id])}</span><span><strong>${escape(p.name)}</strong><small>${state.completedPoiIds.has(p.id)?'已游览':journal.arrived===p.id?'正在游览':journal.stamps[p.id]?'印章已收集':'沿途待发现'}</small></span><i data-lucide="arrow-up-right" aria-hidden="true"></i></button>`).join('')||'<p class="journal-storage">选好景点后，这里会留下你的旅行顺序。</p>';
     if(state.activeView==='follow'&&!scene){scene=window.HuanglongWaterScene?.mount($('#waterScene'),{onInteract:(action,value)=>play(action,value),onTick:tickAnimation,onDragCancel:cancelDrag});if(!scene)$('#waterScene').dataset.renderState='fallback';}
     renderGuide(poi||plan.included.at(-1));renderBook();renderGame();save();
+    window.HuanglongPassportUI?.render({journal,pois:context.pois,openPoiDetail:context.openPoiDetail,checkIn:checkInPoi});
+  }
+  function checkInPoi(id){
+    const allowed=context.pois.filter(p=>p.kind==='scenic').map(p=>p.id);
+    if(!engine.checkIn(journal,id,allowed))return false;
+    save();context.renderAll();return true;
   }
   function completeCurrent(){const poi=current();if(!poi)return;if(journal.arrived===poi.id){if(engine.depart(journal,poi.id))context.state.completedPoiIds.add(poi.id);}else if(engine.arrive(journal,poi.id,context.pois.map(p=>p.id))){const c=engine.CHAPTERS.find(c=>c.poiIds.includes(poi.id));if(c)journal.activeChapter=c.id;announce(`收下「${poi.name}」风景印章${c?'，解锁「'+c.label+'」章节':''}`);}save();context.renderAll();}
   return {restoreInto,render,completeCurrent};
