@@ -243,7 +243,7 @@ window.HuanglongFollow=(()=>{
     $('#followRouteStrip').innerHTML=plan.included.map(p=>`<button type="button" class="journal-stop" data-poi-detail-id="${escape(p.id)}"><span class="mini-stamp">${stamp(p,!!journal.stamps[p.id])}</span><span><strong>${escape(p.name)}</strong><small>${state.completedPoiIds.has(p.id)?'已游览':journal.arrived===p.id?'正在游览':journal.stamps[p.id]?'印章已收集':'沿途待发现'}</small></span><i data-lucide="arrow-up-right" aria-hidden="true"></i></button>`).join('')||'<p class="journal-storage">选好景点后，这里会留下你的旅行顺序。</p>';
     if(state.activeView==='follow'&&!scene){scene=window.HuanglongWaterScene?.mount($('#waterScene'),{onInteract:(action,value)=>play(action,value),onTick:tickAnimation,onDragCancel:cancelDrag});if(!scene)$('#waterScene').dataset.renderState='fallback';}
     renderGuide(poi||plan.included.at(-1));renderBook();renderGame();save();
-    window.HuanglongPassportUI?.render({journal,pois:context.pois,openPoiDetail:context.openPoiDetail,checkIn:checkInPoi});
+    window.HuanglongPassportUI?.render({journal,activeView:state.activeView,pois:context.pois,openPoiDetail:context.openPoiDetail,checkIn:checkInPoi});
   }
   function checkInPoi(id){
     const allowed=context.pois.filter(p=>p.kind==='scenic').map(p=>p.id);

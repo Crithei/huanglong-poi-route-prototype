@@ -4,6 +4,19 @@ const fs=require('node:fs');
 const path=require('node:path');
 function api(){const file=path.join(__dirname,'../passport-state.js');assert.ok(fs.existsSync(file),'passport state must be implemented');return require(file);}
 const arrivals={'five-color-pond':'2026-10-08T00:00:00Z','jinsha-pudi':'2026-10-08T00:00:00Z'};
+
+test('continuous pool observations require arrival, retain old awards and unlock notebook art once',()=>{
+ const p=api(),s=p.create();assert.equal(typeof p.recordPoolObservation,'function');
+ assert.equal(p.recordPoolObservation(s,['connected'],{}).status,'practice');
+ assert.deepEqual(s.observations,{});
+ assert.equal(p.recordPoolObservation(s,['connected'],arrivals).status,'recorded');
+ assert.equal(p.recordPoolObservation(s,['connected','invented'],arrivals).status,'duplicate');
+ p.recordPoolObservation(s,['low-water'],arrivals);
+ assert.equal(p.recordPoolObservation(s,['rim-grown'],arrivals).status,'earned');
+ const restored=p.restore(JSON.stringify(s));assert.ok(p.inventory(restored,arrivals).some(x=>x.id==='sticker:pool'));
+ assert.ok(p.addItem(restored,restored.pages[0].id,'sticker:pool',arrivals));
+ assert.equal(p.inventory(restored,arrivals).filter(x=>x.id==='sticker:pool').length,1);
+});
 test('practice cannot unlock collections and duplicate observations never add rewards',()=>{
   const p=api(),s=p.create();
   assert.equal(p.sample(s,'color',{depth:20,clarity:90},{}).status,'practice');

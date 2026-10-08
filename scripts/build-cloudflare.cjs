@@ -9,6 +9,7 @@ const files = [
   'assets/huanglong-welcome-ponds.jpg',
   'follow.js', 'follow-state.js', 'follow.css', 'assets/water-scene.js',
   'data/passport.js', 'passport-state.js', 'passport-art.js', 'passport.js', 'passport.css',
+  'pool-lab-state.js', 'pool-lab-scene.js', 'pool-lab.js', 'pool-lab.css', 'assets/passport/sticker-pool.svg',
   'assets/passport/welcome-pond.svg', 'assets/passport/flying-waterfall.svg', 'assets/passport/jinsha-pudi.svg',
   'assets/passport/bonsai-pond.svg', 'assets/passport/zhengyan-chi.svg', 'assets/passport/five-color-pond.svg',
   'assets/passport/sticker-color.svg', 'assets/passport/sticker-flow.svg', 'assets/passport/sticker-mineral.svg',

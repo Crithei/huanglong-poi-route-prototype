@@ -555,7 +555,10 @@ function setActiveView(viewName) {
     renderMap(appState.currentPlan || buildPlan(appState.selectedPoiIds, appState.preferences, appState.completedPoiIds));
     window.setTimeout(() => { if(appState.activeView==='map'){mapRuntime.map?.resize(); syncAmapPlan(appState.currentPlan);} }, 60);
   }
-  if (viewName === "follow") { renderFollow(); refreshIcons(); }
+  // Notify follow components on departure too, so animation pauses even in
+  // browsers without visibility observers.
+  renderFollow();
+  if (viewName === "follow") refreshIcons();
   document.querySelector("main").scrollTo({ top: 0 });
 }
 

@@ -12,7 +12,7 @@
   const validId=v=>typeof v==='string'&&/^[A-Za-z0-9_-]{1,80}$/.test(v);
   function experimentView(id,v){
     const e=D.experiments.find(e=>e.id===id);
-    if(!e||!v||e.controls.some(c=>!Number.isFinite(v[c.id])||v[c.id]<0||v[c.id]>100))return null;
+    if(!e||id==='pool'||!v||e.controls.some(c=>!Number.isFinite(v[c.id])||v[c.id]<0||v[c.id]>100))return null;
     if(id==='color'){
       const goal=v.clarity<=35?'turbid':v.clarity>=70?(v.depth<=35?'shallow':v.depth>=75?'deep':null):null;
       return {goal,depth:v.depth/100,clarity:v.clarity/100,caption:goal==='turbid'?'悬浮物遮住了池底，透明度降低。':v.depth>=75?'水更深，光在水中经过的路程变长。':'浅水中，明亮的池底更容易被看见。'};
@@ -33,6 +33,15 @@
     if(notes.includes(view.goal))return {status:'duplicate',message:'这类观察已收好，换一个条件看看。'};
     notes.push(view.goal);const earned=full(s,e);
     return {status:earned?'earned':'recorded',message:earned?`三种观察已集齐，收下「${e.reward}」贴纸。`:`已记下「${e.goals.find(g=>g.id===view.goal).label}」。再改变一个条件。`};
+  }
+  const POOL_GOALS=['connected','low-water','rim-grown'];
+  function recordPoolObservation(s,goals,stamps){
+    if(!unlocked('pool',stamps))return {status:'practice',message:'这是预习。到关联景点确认到达后，再记录池群观察即可收集贴纸。'};
+    const known=(Array.isArray(goals)?goals:[]).filter(g=>POOL_GOALS.includes(g));
+    const notes=s.observations.pool||(s.observations.pool=[]),newGoals=[...new Set(known)].filter(g=>!notes.includes(g));
+    if(!newGoals.length)return {status:known.length?'duplicate':'explore',message:known.length?'这类池群观察已收好，继续改变条件看看。':'这一刻已留在观察记录里，继续推演看看池群如何变化。'};
+    notes.push(...newGoals);const earned=POOL_GOALS.every(g=>notes.includes(g));
+    return {status:earned?'earned':'recorded',message:earned?'三类池群观察已集齐，收下「池群观察者」贴纸。':`记下 ${newGoals.length} 类新发现。继续观察水路、退水和池沿的变化。`};
   }
   function inventory(s,stamps){return [
     ...D.places.filter(p=>hasArrival(stamps,p.id)).map(p=>({id:'stamp:'+p.id,kind:'stamp',title:p.name,src:'assets/passport/'+p.id+'.svg'})),
@@ -64,5 +73,5 @@
     }
     return s;
   }
-  return {create,restore,hasArrival,unlocked,experimentView,sample,inventory,milestones,updateProfile,addPage,updatePage,addItem,moveItem,removeItem,removePage};
+  return {create,restore,hasArrival,unlocked,experimentView,sample,recordPoolObservation,inventory,milestones,updateProfile,addPage,updatePage,addItem,moveItem,removeItem,removePage};
 });

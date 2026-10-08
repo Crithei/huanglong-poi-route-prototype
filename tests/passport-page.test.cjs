@@ -4,24 +4,23 @@ const root=path.join(__dirname,'..'),key='huanglong.passport.v1';
 async function page(saved,{storageFailure=false}={}){
   const dom=new JSDOM(fs.readFileSync(path.join(root,'index.html'),'utf8'),{url:'https://prototype.test/?view=follow&passportTab=passport',runScripts:'outside-only',virtualConsole:new VirtualConsole()}),w=dom.window;
   w.matchMedia=()=>({matches:true,addEventListener(){}});w.setInterval=()=>1;w.setTimeout=()=>1;
+  w.HTMLCanvasElement.prototype.getContext=()=>null;
   w.HTMLElement.prototype.scrollIntoView=()=>{};w.HTMLElement.prototype.scrollTo=()=>{};
   w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;};
   if(saved)for(const [k,v] of Object.entries(saved))w.localStorage.setItem(k,v);
   if(storageFailure)w.Storage.prototype.setItem=function(){throw new Error('quota');};
-  for(const f of ['data/facilities.js','data/scenic.js','data/stamps.js','data/passport.js','passport-state.js','passport-art.js','passport.js','map.js','follow-state.js','follow.js','app.js']){assert.ok(fs.existsSync(path.join(root,f)),f+' must exist');vm.runInContext(fs.readFileSync(path.join(root,f),'utf8'),dom.getInternalVMContext(),{filename:f});}
+  for(const f of ['data/facilities.js','data/scenic.js','data/stamps.js','data/passport.js','passport-state.js','passport-art.js','pool-lab-state.js','pool-lab-scene.js','pool-lab.js','passport.js','map.js','follow-state.js','follow.js','app.js']){assert.ok(fs.existsSync(path.join(root,f)),f+' must exist');vm.runInContext(fs.readFileSync(path.join(root,f),'utf8'),dom.getInternalVMContext(),{filename:f});}
   await Promise.resolve();const $=s=>w.document.querySelector(s),click=s=>{assert.ok($(s),s+' exists');$(s).click();};
   const input=(s,v)=>{$(s).value=v;$(s).dispatchEvent(new w.Event('input',{bubbles:true}));};
   const checkin=id=>{click(`[data-passport-place="${id}"]`);assert.equal($('#passportPlaceDialog').open,true);click('#passportConfirmArrival');};
   return {w,dom,$,click,input,checkin,state:()=>JSON.parse(w.localStorage.getItem(key)),saved:()=>Object.fromEntries(Object.keys(w.localStorage).map(k=>[k,w.localStorage.getItem(k)]))};
 }
-test('passport connects manual arrival, experiment collection and persisted notebook',async()=>{
-  const p=await page();try{
+test('passport connects manual arrival, legacy experiment collection and persisted notebook',async()=>{
+  const p=await page({[key]:JSON.stringify({version:1,observations:{color:['shallow','deep','turbid']}})});try{
     assert.match(p.$('#passportSummary').textContent,/0/);
     p.checkin('five-color-pond');p.checkin('five-color-pond');
     assert.match(p.$('#passportSummary').textContent,/1/);
-    p.click('[data-passport-tab="labs"]');p.click('[data-lab="color"]');
-    p.click('#labRecord');p.input('[data-lab-control="depth"]',85);p.click('#labRecord');p.input('[data-lab-control="clarity"]',20);p.click('#labRecord');
-    assert.match(p.$('#labFeedback').textContent,/贴纸/);assert.equal(p.state().observations.color.length,3);
+    assert.equal(p.state().observations.color.length,3,'old observations survive the new experiment page');
     p.click('[data-passport-tab="notebook"]');p.input('#notebookTitle','一滴水的三种颜色');p.input('#notebookNote','今天的倒影很好看。');
     p.click('[data-add-art="stamp:five-color-pond"]');p.click('[data-add-art="sticker:color"]');
     assert.equal(p.$('#notebookCanvas').querySelectorAll('[data-notebook-item]').length,2);
@@ -31,7 +30,7 @@ test('passport connects manual arrival, experiment collection and persisted note
 });
 test('practice and missed check-ins cannot leak locked art into the notebook',async()=>{
   const p=await page();try{
-    p.click('[data-passport-tab="labs"]');p.click('#labRecord');assert.match(p.$('#labFeedback').textContent,/预习/);assert.deepEqual(p.state().observations,{});
+    p.click('[data-passport-tab="labs"]');p.click('#poolRecord');assert.match(p.$('#poolFeedback').textContent,/预习/);assert.deepEqual(p.state().observations,{});
     p.click('[data-passport-tab="notebook"]');assert.equal(p.$('[data-add-art]'),null);
     assert.match(p.$('#notebookInventory').textContent,/到达/);
     p.click('[data-passport-tab="passport"]');p.click('[data-passport-place="five-color-pond"]');p.click('[data-close-passport-place]');

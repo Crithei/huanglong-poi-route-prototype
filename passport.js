@@ -1,8 +1,7 @@
 window.HuanglongPassportUI=(()=>{
   const D=window.HuanglongPassportData,P=window.HuanglongPassport,A=window.HuanglongPassportArt,key='huanglong.passport.v1';
   const $=s=>document.querySelector(s),h=A.esc;
-  let state=P.create(),context,ready=false,tab='passport',lab='color',pageId=state.pages[0].id,selected='',placeId='',drag=null,exportToken=0;
-  const values=Object.fromEntries(D.experiments.map(e=>[e.id,Object.fromEntries(e.controls.map(c=>[c.id,c.initial]))]));
+  let state=P.create(),context,ready=false,tab='passport',poolLab=null,pageId=state.pages[0].id,selected='',placeId='',drag=null,exportToken=0;
   let warning='';try{state=P.restore(localStorage.getItem(key));pageId=state.pages[0].id;}catch{warning='当前浏览器无法读取进度。本次仍可编辑并导出手账。';}
   const stamps=()=>context?.journal.stamps||{};
   const inventory=()=>P.inventory(state,stamps());
@@ -19,11 +18,10 @@ window.HuanglongPassportUI=(()=>{
       <div id="passportThemes" class="passport-themes"></div><div id="passportMilestone" class="passport-milestone"></div>
       <div class="passport-section-head"><div><p class="passport-kicker">SIX LANDSCAPE SEALS</p><h3>把山水一枚枚收好</h3></div><button type="button" id="passportLegacy">全部印章</button></div>
       <p class="passport-small">轻点纪念章，查看细节、到达打卡或关联实验。</p><div id="passportPlaces" class="passport-places"></div>
-      <details class="passport-rules"><summary>打卡与收集规则</summary><ol><li>本原型由你手动确认到达；不验证定位，不代表现场核验。</li><li>六处主章每处只计一枚，顺序自由；其他景点仍保留在全部印章册。</li><li>原有到达记录自动继承。删减路线、重玩游戏不扣除已经获得的章。</li><li>实验可先预习；到达任一关联景点后，记录三种对照才获得该实验的贴纸，重复记录不重复发奖。</li><li>三种主题按各自条件独立完成。切换主题不会清空收藏，无须走完整条沟。</li><li>当前只有数字收藏；不产生实物兑换权益。线下赠品与核销方案见策划案。</li></ol></details>
+      <details class="passport-rules"><summary>打卡与收集规则</summary><ol><li>本原型由你手动确认到达；不验证定位，不代表现场核验。</li><li>六处主章每处只计一枚，顺序自由；其他景点仍保留在全部印章册。</li><li>原有到达记录自动继承。删减路线、重玩游戏不扣除已经获得的章。</li><li>彩池实验可先预习；到达关联景点后，记录连通水路、水位下降、池沿积累三类发现，收下池群观察贴纸。旧版贴纸保留。</li><li>三种主题按各自条件独立完成。切换主题不会清空收藏，无须走完整条沟。</li><li>当前只有数字收藏；不产生实物兑换权益。线下赠品与核销方案见策划案。</li></ol></details>
     </section>
     <section id="passportPanel-labs" role="tabpanel" aria-labelledby="passportTab-labs" class="passport-panel" hidden>
-      <div class="passport-section-head"><div><p class="passport-kicker">A SMALL FIELD LAB</p><h2>动手，看见原因</h2></div><span class="passport-small">不计分 · 可反复试</span></div><p class="passport-intro">只改变一个条件，再留下一张观察。三次对照，收一枚发现。</p>
-      <div id="passportLabs" class="passport-labs"></div><article id="passportLab" class="passport-lab"></article>
+      <article id="poolLab"></article>
       <button type="button" id="passportWaterStory" class="passport-wide passport-secondary">打开四章 3D 水滴旅程 →</button>
     </section>
     <section id="passportPanel-notebook" role="tabpanel" aria-labelledby="passportTab-notebook" class="passport-panel" hidden>
@@ -45,24 +43,29 @@ window.HuanglongPassportUI=(()=>{
     for(const panel of document.querySelectorAll('[id^="passportPanel-"]'))panel.hidden=panel.id!=='passportPanel-'+tab;
     for(const panel of document.querySelectorAll('[data-follow-trail]'))panel.hidden=tab!=='trail';
     if(tab==='passport')renderPassport();if(tab==='labs')renderLab();if(tab==='notebook')renderNotebook();
+    poolLab?.setActive(tab==='labs'&&context?.activeView==='follow');
   }
   function renderPassport(){
     const places=D.places.filter(p=>P.hasArrival(stamps(),p.id)),items=inventory(),milestones=P.milestones(state,stamps()),theme=milestones.find(t=>t.id===state.profile.theme);
-    $('#passportSummary').textContent=`${places.length} / 6 枚主章 · ${items.filter(i=>i.kind==='sticker').length} / 3 枚发现贴纸`;
+    $('#passportSummary').textContent=`${places.length} / 6 枚主章 · ${items.filter(i=>i.kind==='sticker').length} 枚发现贴纸`;
     $('#passportThemes').innerHTML=milestones.map(t=>`<button type="button" data-passport-theme="${t.id}" aria-pressed="${t.id===theme.id}"><strong>${t.title}</strong><small>${t.earned?'✓ '+t.reward:t.need+' 枚主章'+(t.labs?' + 1 贴纸':'')}</small></button>`).join('');
     $('#passportMilestone').innerHTML=`<span>${theme.earned?'✧ 已获得「'+theme.reward+'」':'本次主题 · '+theme.title}</span><p>${h(theme.description)}</p><div class="passport-track"><i style="width:${Math.min(100,theme.count/theme.need*100)}%"></i></div><small>${Math.min(theme.count,theme.need)} / ${theme.need} 枚主章${theme.labs?' · '+Math.min(theme.labCount,theme.labs)+' / 1 枚贴纸':''}</small>`;
     $('#passportPlaces').innerHTML=D.places.map((p,i)=>{const owned=P.hasArrival(stamps(),p.id);return `<button type="button" data-passport-place="${p.id}" class="passport-place ${owned?'owned':'locked'}"><span class="passport-place-no">0${i+1} / ${h(p.mark)}</span><img src="assets/passport/${p.id}.svg" alt="${p.name}纪念章"/><strong>${p.name}</strong><small>${owned?'✓ 已盖章 · 查看收藏':'待相遇 · 查看与打卡'}</small></button>`;}).join('');
   }
-  function openPlace(id){const p=D.places.find(p=>p.id===id);if(!p)return;placeId=id;updatePlace();$('#passportPlaceDialog').showModal();}
+  function openPlace(id){const p=D.places.find(p=>p.id===id);if(!p)return;placeId=id;poolLab?.pause();updatePlace();$('#passportPlaceDialog').showModal();}
   function updatePlace(){const p=D.places.find(p=>p.id===placeId),owned=P.hasArrival(stamps(),placeId);$('#passportPlaceArt').innerHTML=`<img src="assets/passport/${p.id}.svg" alt="${p.name}纪念章大图"/>`;$('#passportPlaceMotto').textContent=p.mark;$('#passportPlaceTitle').textContent=p.name;$('#passportPlaceDetail').textContent=p.caption+' '+p.detail;$('#passportPlaceStatus').textContent=owned?'已收藏 · '+new Date(stamps()[placeId]).toLocaleDateString('zh-CN')+' · 手动到达记录':'请到达景点后再确认。本原型使用手动打卡，不做定位核验。';$('#passportConfirmArrival').disabled=owned;$('#passportConfirmArrival').textContent=owned?'✓ 这枚章已收好':'我已到达 · 盖下此章';$('#passportPlaceNotebook').hidden=!owned;}
   function renderLab(){
-    const e=D.experiments.find(e=>e.id===lab),unlocked=P.unlocked(lab,stamps());
-    $('#passportLabs').innerHTML=D.experiments.map(e=>`<button type="button" data-lab="${e.id}" aria-pressed="${lab===e.id}"><span>${e.icon}</span>${e.title}<small>${inventory().some(i=>i.id==='sticker:'+e.id)?'✓ 已收集':P.unlocked(e.id,stamps())?'已解锁':'可预习'}</small></button>`).join('');
-    $('#passportLab').innerHTML=`<div class="lab-heading"><p class="passport-kicker">${e.eyebrow}</p><span>${unlocked?'到站观察': '预习模式'} · ${e.duration}</span></div><h3>${e.question}</h3><div id="labScene" class="lab-scene"></div><p id="labCaption" class="lab-caption" aria-live="polite"></p><div class="lab-controls">${e.controls.map(c=>`<label for="lab-${c.id}">${c.label}<span>${c.low} → ${c.high}</span><input type="range" id="lab-${c.id}" data-lab-control="${c.id}" min="0" max="100" value="${values[lab][c.id]}"/></label>`).join('')}</div><button type="button" id="labRecord" class="passport-primary passport-wide">${unlocked?'记录这一刻':'试着记录 · 预习'}</button><p id="labFeedback" class="lab-feedback" role="status">${unlocked?'调节上方条件，保留三种不同的观察。':'现在可以自由探索；到关联景点后再记录，即可收集贴纸。'}</p><div id="labObservations" class="lab-observations"></div><div id="labConclusion" class="lab-conclusion" hidden></div><div class="lab-places"><span>到任意一处解锁</span>${e.poiIds.map(id=>`<button type="button" data-passport-place="${id}">${h(context.pois.find(p=>p.id===id)?.name||id)} ${P.hasArrival(stamps(),id)?'✓':'↗'}</button>`).join('')}</div><details class="lab-science"><summary>这次实验能说明什么</summary><p>${e.conclusion}</p><p>${e.boundary}</p><p>现场再看：${e.field}</p></details>`;
-    renderLabScene();renderObservations();
+    if(!poolLab&&window.HuanglongPoolLab)poolLab=window.HuanglongPoolLab.mount($('#poolLab'),{
+      collection:()=>({unlocked:P.unlocked('pool',stamps()),notes:state.observations.pool||[]}),
+      record:goals=>{const result=P.recordPoolObservation(state,goals,stamps());save();return result;},
+      notebook:record=>{const next=P.addPage(state);if(!next)return false;
+        pageId=next.id;selected='';P.updatePage(state,pageId,record);
+        const art=inventory().find(i=>i.id==='sticker:pool')||inventory().find(i=>i.kind==='stamp');
+        if(art)P.addItem(state,pageId,art.id,stamps());save();invalidateExport();$('#notebookDeleteConfirm').hidden=true;switchTab('notebook');
+        toast('已将这次彩池观察写入新的一页，你可以继续编辑。');return true;}
+    });
+    poolLab?.refresh();
   }
-  function renderLabScene(){const v=P.experimentView(lab,values[lab]);$('#labScene').innerHTML=A.experiment(lab,v);$('#labCaption').textContent=v.caption;}
-  function renderObservations(){const e=D.experiments.find(e=>e.id===lab),notes=P.unlocked(lab,stamps())?state.observations[lab]||[]:[];$('#labObservations').innerHTML=e.goals.map(g=>`<div class="${notes.includes(g.id)?'recorded':''}"><span>${notes.includes(g.id)?'✓':'○'}</span><div><strong>${g.label}</strong><p>${g.hint}</p></div></div>`).join('');const won=e.goals.every(g=>notes.includes(g.id));$('#labConclusion').hidden=!won;$('#labConclusion').innerHTML=won?`<img src="assets/passport/sticker-${e.id}.svg" alt="${e.reward}贴纸"/><h4>你留住了一次发现</h4><p>${e.conclusion}</p><button type="button" data-to-notebook class="passport-secondary">把贴纸放进手账 →</button>`:'';}
   function renderNotebook(){
     const p=page();pageId=p.id;const items=inventory();$('#notebookPages').innerHTML=state.pages.map((p,i)=>`<button type="button" data-notebook-page="${h(p.id)}" aria-pressed="${pageId===p.id}">第 ${i+1} 页</button>`).join('');
     $('#notebookTitle').value=p.title;$('#notebookDate').value=p.date;$('#notebookNote').value=p.note;$('#notebookPaper').value=p.paper;$('#notebookDeletePage').disabled=state.pages.length<=1;$('#notebookAddPage').disabled=state.pages.length>=12;
@@ -77,7 +80,6 @@ window.HuanglongPassportUI=(()=>{
       if(b.dataset.passportTab)switchTab(b.dataset.passportTab);
       if(b.dataset.passportTheme){P.updateProfile(state,{theme:b.dataset.passportTheme});save();renderPassport();}
       if(b.dataset.passportPlace)openPlace(b.dataset.passportPlace);
-      if(b.dataset.lab){lab=b.dataset.lab;renderLab();}
       if(b.hasAttribute('data-to-notebook'))switchTab('notebook');
       if(b.dataset.notebookPage){pageId=b.dataset.notebookPage;selected='';invalidateExport();$('#notebookDeleteConfirm').hidden=true;renderNotebook();}
       if(b.dataset.addArt){const i=P.addItem(state,pageId,b.dataset.addArt,stamps());if(i){selected=i.id;save();invalidateExport();renderNotebook();toast('已贴入「'+inventory().find(a=>a.id===i.art).title+'」，拖动它试试。');}}
@@ -86,12 +88,10 @@ window.HuanglongPassportUI=(()=>{
     $('#passportName').addEventListener('input',e=>{P.updateProfile(state,{name:e.target.value});save();invalidateExport();});
     $('#passportLegacy').addEventListener('click',()=>$('#openStampBook').click());
     $('#passportWaterStory').addEventListener('click',()=>{switchTab('trail');$('#waterTitle').scrollIntoView({block:'start',behavior:'instant'});});
-    $('#passportLab').addEventListener('input',e=>{if(e.target.dataset.labControl){values[lab][e.target.dataset.labControl]=Number(e.target.value);renderLabScene();}});
-    $('#passportLab').addEventListener('click',e=>{if(!e.target.closest('#labRecord'))return;const r=P.sample(state,lab,values[lab],stamps());save();$('#labFeedback').textContent=r.message||'调整条件后重试。';renderObservations();if(r.status==='earned'){toast(r.message);$('#labConclusion').scrollIntoView({block:'nearest',behavior:'instant'});}});
     dialog.addEventListener('click',e=>{if(e.target===dialog||e.target.closest('[data-close-passport-place]'))dialog.close();});
     $('#passportConfirmArrival').addEventListener('click',()=>{const result=context.checkIn(placeId);updatePlace();$('#passportPlaceArt').classList.remove('just-stamped');void $('#passportPlaceArt').offsetWidth;$('#passportPlaceArt').classList.add('just-stamped');toast(result?'已盖下「'+D.places.find(p=>p.id===placeId).name+'」纪念章。':'这枚章已经收好。');if(tab==='labs')renderLab();});
     $('#passportPlaceNotebook').addEventListener('click',()=>{dialog.close();switchTab('notebook');const i=P.addItem(state,pageId,'stamp:'+placeId,stamps());if(i){selected=i.id;save();invalidateExport();renderNotebook();}else toast('这一页已放满 6 枚，可以新建一页。');});
-    $('#passportPlaceLab').addEventListener('click',()=>{lab=D.experiments.find(e=>e.poiIds.includes(placeId))?.id||'color';dialog.close();switchTab('labs');});
+    $('#passportPlaceLab').addEventListener('click',()=>{dialog.close();switchTab('labs');});
     $('#passportPlacePoi').addEventListener('click',()=>{dialog.close();context.openPoiDetail(placeId);});
     for(const [id,field] of [['notebookTitle','title'],['notebookNote','note'],['notebookDate','date'],['notebookPaper','paper']])$('#'+id).addEventListener('input',e=>changePage(()=>P.updatePage(state,pageId,{[field]:e.target.value})));
     $('#notebookAddPage').addEventListener('click',()=>{const p=P.addPage(state);if(p){pageId=p.id;selected='';$('#notebookDeleteConfirm').hidden=true;save();invalidateExport();renderNotebook();}});
