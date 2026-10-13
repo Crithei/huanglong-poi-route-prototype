@@ -1,5 +1,7 @@
 # Cloudflare 部署
 
+2026-10-13接手请先读[HANDOFF](HANDOFF.md)。当前构建为45个公开资源（本轮重跑通过），下文带2026-09-18/20日期的部署及网络结果属于历史记录；2026-10-08实验室发布记录见[模块说明](docs/pool-lab-guide.md)。本次GitHub同步不重新部署网站。
+
 在线地址：[huanglong-route.itsmephrynx.workers.dev](https://huanglong-route.itsmephrynx.workers.dev/)
 
 本项目部署为独立 Worker `huanglong-route`，使用 Cloudflare 免费 `workers.dev` 域名，`workers_dev: true`、`routes: []`。静态网页和高德代理在同一域名下运行，不依赖本机预览服务。
@@ -8,7 +10,7 @@
 
 - `wrangler.jsonc`：Worker、静态资源目录与免费域名开关。
 - `cloudflare/worker.mjs`：公开运行配置和高德代理。
-- `scripts/build-cloudflare.cjs`：只复制白名单内的 21 个公开文件，生成 `dist/`。源码、测试、部署配置和本机凭据不进入公开资源目录。
+- `scripts/build-cloudflare.cjs`：只复制显式白名单内的公开文件（当前45个），生成 `dist/`。源码、测试、部署配置和本机凭据不进入公开资源目录。
 - `map.js`：在线版使用 `amapServiceHost`；本机 `server.js` 仍支持原开发配置。
 
 网页从 `/runtime-config.js` 获取公开的 JSAPI Key 和同源代理地址。安全密钥只保存在 Worker Secrets 中。`/_AMapService/v4/map/styles` 转发至 `webapi.amap.com`，其余支持的高德 API 路径转发至 `restapi.amap.com`。
